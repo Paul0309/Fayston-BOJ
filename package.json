@@ -6,6 +6,7 @@
     "dev": "next dev",
     "dev:worker": "tsx scripts/judge-worker.ts",
     "worker": "tsx scripts/judge-worker.ts",
+    "migrate:sqlite-to-postgres": "tsx scripts/migrate-sqlite-to-postgres.ts",
     "build": "prisma generate && prisma db push && next build",
     "start": "next start",
     "lint": "eslint"
@@ -15,6 +16,7 @@
     "@prisma/client": "^6.19.2",
     "axios": "^1.13.5",
     "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.6.2",
     "clsx": "^2.1.1",
     "dockerode": "^4.0.9",
     "jsonwebtoken": "^9.0.3",
@@ -23,6 +25,7 @@
     "monaco-editor": "^0.55.1",
     "next": "16.1.6",
     "next-auth": "^4.24.13",
+    "pg": "^8.18.0",
     "prisma": "^6.19.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
