@@ -1,0 +1,1 @@
+ALTER TABLE "User" ADD COLUMN "division" TEXT NOT NULL DEFAULT 'Bronze';

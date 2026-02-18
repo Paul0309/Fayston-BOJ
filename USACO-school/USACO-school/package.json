@@ -1,0 +1,20 @@
+{
+  "name": "usaco-school-next",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "clean": "node -e \"const fs=require('fs'); fs.rmSync('.next',{recursive:true,force:true}); console.log('cleaned .next');\"",
+    "dev:clean": "npm run clean && next dev",
+    "dev": "next dev",
+    "build:clean": "npm run clean && next build",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "^4.6.0",
+    "next": "15.1.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  }
+}

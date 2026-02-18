@@ -1,0 +1,197 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  password  String   // In a real app, hash this!
+  role      String   @default("STUDENT") // ADMIN, STUDENT
+  division  String   @default("Bronze") // Bronze, Silver, Gold, Platinum
+  solvedCount Int    @default(0)
+  createdAt DateTime @default(now())
+  
+  submissions Submission[]
+}
+
+model Problem {
+  id          String   @id @default(uuid())
+  number      Int      @unique
+  title       String
+  difficulty  String   @default("BRONZE_5")
+  tags        String   @default("")
+  description String
+  inputDesc   String?
+  outputDesc  String?
+  timeLimit   Int      @default(1000) // ms
+  memoryLimit Int      @default(128)  // MB
+  createdAt   DateTime @default(now())
+  
+  testCases   TestCase[]
+  submissions Submission[]
+  revisions   ProblemRevision[]
+  aiReviews   ProblemAiReview[]
+  
+  contestId   String?
+  contest     Contest? @relation(fields: [contestId], references: [id])
+}
+
+model ProblemAiReview {
+  id                  String   @id @default(uuid())
+  problemId           String
+  status              String   @default("PENDING") // PENDING, APPLIED, REJECTED, ERROR
+  issues              String   // JSON string array
+  proposedDescription String?
+  proposedInputDesc   String?
+  proposedOutputDesc  String?
+  model               String?
+  errorMessage        String?
+  createdBy           String?
+  reviewedBy          String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  reviewedAt          DateTime?
+
+  problem             Problem  @relation(fields: [problemId], references: [id])
+
+  @@index([problemId, status])
+  @@index([status, createdAt])
+}
+
+model TestCase {
+  id        String  @id @default(uuid())
+  input     String
+  output    String
+  isHidden  Boolean @default(true) // False for example cases
+  score     Int     @default(100)
+  groupName String  @default("default")
+  problemId String
+  problem   Problem @relation(fields: [problemId], references: [id])
+}
+
+model Submission {
+  id        String   @id @default(uuid())
+  code      String
+  isPublic  Boolean  @default(false)
+  codeVisibility String @default("PRIVATE") // PRIVATE, PUBLIC, ACCEPTED_ONLY
+  language  String
+  status    String   @default("PENDING") // PENDING, ACCEPTED, WRONG_ANSWER, TLE, MLE, COMPILATION_ERROR
+  detail    String?
+  failedCase Int?
+  expectedOutput String?
+  actualOutput String?
+  totalScore Int?     @default(0)
+  maxScore   Int?     @default(0)
+  timeUsed  Int?     // ms
+  memoryUsed Int?    // KB
+  createdAt DateTime @default(now())
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  problemId String
+  problem   Problem  @relation(fields: [problemId], references: [id])
+}
+
+model Contest {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  createdAt   DateTime  @default(now())
+  
+  problems    Problem[]
+}
+
+model PlatformSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model JudgeQueue {
+  id           String   @id @default(uuid())
+  submissionId String   @unique
+  status       String   @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
+  attempts     Int      @default(0)
+  lastError    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  startedAt    DateTime?
+  finishedAt   DateTime?
+}
+
+model ProblemEditorial {
+  id         String   @id @default(uuid())
+  problemId  String
+  authorId   String
+  title      String
+  content    String
+  isOfficial Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ProblemDiscussion {
+  id        String   @id @default(uuid())
+  problemId String
+  userId    String
+  content   String
+  parentId  String?
+  likeCount Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DiscussionLike {
+  id           String   @id @default(uuid())
+  discussionId String
+  userId       String
+  createdAt    DateTime @default(now())
+
+  @@unique([discussionId, userId])
+}
+
+model ProblemRevision {
+  id          String   @id @default(uuid())
+  problemId   String
+  version     Int
+  title       String
+  description String
+  inputDesc   String?
+  outputDesc  String?
+  timeLimit   Int
+  memoryLimit Int
+  tags        String
+  createdBy   String?
+  createdAt   DateTime @default(now())
+
+  problem     Problem  @relation(fields: [problemId], references: [id])
+
+  @@unique([problemId, version])
+}
+
+model AutomationSchedule {
+  id              String   @id @default(uuid())
+  type            String   // "AI_REVIEW" or "AUTO_PROBLEM_GEN"
+  enabled         Boolean  @default(true)
+  cronExpression  String   // cron format: "0 */6 * * *"
+  presetLabel     String?  // "hourly", "every-6-hours", "daily-2am", etc
+  lastRunAt       DateTime?
+  nextRunAt       DateTime?
+  config          String   // JSON string with type-specific settings
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([type])
+  @@index([type, enabled])
+}

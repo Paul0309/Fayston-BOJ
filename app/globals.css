@@ -1,0 +1,1326 @@
+﻿@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.boj-code-font {
+  font-family: Consolas, "Liberation Mono", Menlo, Monaco, "Courier New", monospace;
+}
+
+.usaco-subnav {
+  height: 44px;
+  border-top: 1px solid #1f1f1f;
+  border-bottom: 1px solid #2a2a2a;
+  background: #131313;
+}
+
+.usaco-subnav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 100%;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.usaco-sub-logo {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 800;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.usaco-sub-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.usaco-sub-links a {
+  color: #b8b8b8;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.usaco-sub-links a:hover {
+  color: #f1f1f1;
+}
+
+.usaco-sub-right {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.usaco-user-badge {
+  font-size: 13px;
+  color: #d1d1d1;
+}
+
+.usaco-user-badge em {
+  color: #7e7e7e;
+  font-style: normal;
+}
+
+.usaco-home {
+  background: #0d0d0d;
+  min-height: calc(100vh - 108px);
+}
+
+.usaco-hero {
+  min-height: calc(100vh - 108px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 3rem;
+  padding: 5rem 8% 5rem;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 70% 40%, rgba(59, 130, 246, 0.15) 0%, transparent 55%),
+    radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.06) 0%, transparent 45%),
+    #0d0d0d;
+}
+
+.usaco-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #3a3a3a;
+  background: #0f1f35;
+  color: #67a7ff;
+  border-radius: 999px;
+  padding: 0.22rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin: 0 0 1.4rem;
+}
+
+.usaco-hero-title {
+  margin: 0 0 0.6rem;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  font-size: clamp(2.6rem, 4.5vw, 4rem);
+  font-weight: 900;
+  color: #efefef;
+}
+
+.usaco-hero-title span {
+  color: #5f85ff;
+}
+
+.usaco-hero-desc {
+  margin: 0 0 2rem;
+  max-width: 420px;
+  color: #b8c0cf;
+  font-size: 1.05rem;
+  line-height: 1.7;
+}
+
+.usaco-hero-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background: #3b82f6;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 8px;
+  padding: 0.72rem 1.6rem;
+  font-size: 0.97rem;
+}
+
+.usaco-terminal {
+  border: 1px solid #2a2a2a;
+  background: #0b0b0b;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.usaco-terminal-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #2a2a2a;
+  background: #171717;
+  padding: 10px 14px;
+}
+
+.usaco-terminal-head span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.usaco-terminal-head span:nth-child(1) {
+  background: #ff5f57;
+}
+
+.usaco-terminal-head span:nth-child(2) {
+  background: #febc2e;
+}
+
+.usaco-terminal-head span:nth-child(3) {
+  background: #28c840;
+}
+
+.usaco-terminal-head em {
+  margin-left: 4px;
+  font-style: normal;
+  color: #606060;
+  font-size: 12px;
+}
+
+.usaco-terminal pre {
+  margin: 0;
+  padding: 1.1rem 1.1rem 1.3rem;
+  color: #d8d8d8;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  font-family: Consolas, "Courier New", monospace;
+}
+
+.usaco-division-strip {
+  border-top: 1px solid #2a2a2a;
+  border-bottom: 1px solid #2a2a2a;
+  padding: 2.5rem 8%;
+  background: #151515;
+}
+
+.usaco-division-strip h2 {
+  margin: 0 0 1.5rem;
+  color: #7a7a7a;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.usaco-division-track {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.usaco-division-node {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  padding: 0.75rem 0.5rem;
+}
+
+.usaco-division-node::after {
+  content: "→";
+  position: absolute;
+  right: -0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 1rem;
+}
+
+.usaco-division-node:last-child::after {
+  display: none;
+}
+
+.usaco-division-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.4rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  border: 1px solid #363636;
+}
+
+.usaco-division-badge.bronze {
+  background: #2b1c09;
+  color: #f9a52f;
+}
+
+.usaco-division-badge.silver {
+  background: #232323;
+  color: #b0b0b0;
+}
+
+.usaco-division-badge.gold {
+  background: #2a2309;
+  color: #f4d03f;
+}
+
+.usaco-division-badge.platinum {
+  background: #10243f;
+  color: #67a7ff;
+}
+
+.usaco-division-sub {
+  margin-top: 0.35rem;
+  color: #6d6d6d;
+  font-size: 0.76rem;
+}
+
+.usaco-feature-grid {
+  padding: 4rem 8%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.1rem;
+}
+
+.usaco-feature-grid article {
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.usaco-feature-grid h3 {
+  margin: 0 0 0.5rem;
+  color: #f1f1f1;
+  font-size: 0.97rem;
+}
+
+.usaco-feature-grid p {
+  margin: 0;
+  color: #9f9f9f;
+  line-height: 1.6;
+  font-size: 0.86rem;
+}
+
+.usaco-archive {
+  background: #151515;
+  border-top: 1px solid #2a2a2a;
+  padding: 3rem 8%;
+}
+
+.usaco-archive h2 {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+  color: #f1f1f1;
+}
+
+.usaco-archive p {
+  margin: 0 0 1rem;
+  color: #b4b4b4;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.usaco-archive-btn {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #3b3b3b;
+  border-radius: 7px;
+  padding: 0.48rem 0.9rem;
+  color: #d6d6d6;
+  text-decoration: none;
+  font-size: 0.87rem;
+  font-weight: 600;
+}
+
+.usaco-rules {
+  background: #0f0f0f;
+  border-top: 1px solid #2a2a2a;
+  padding: 3rem 8%;
+}
+
+.usaco-rules h2 {
+  margin: 0 0 1.25rem;
+  font-size: 1.15rem;
+  color: #f1f1f1;
+}
+
+.usaco-rules ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.usaco-rules li {
+  font-size: 0.9rem;
+  color: #b6b6b6;
+  line-height: 1.5;
+}
+
+.usaco-rules li::before {
+  content: "— ";
+  color: #4e8df7;
+}
+
+.usaco-contest-root {
+  height: calc(100vh - 108px);
+  overflow: hidden;
+  background: #111;
+  padding: 0;
+}
+
+.usaco-contest-main {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 310px minmax(0, 1fr);
+  max-width: none;
+  margin: 0 auto;
+  border-top: 1px solid #2a2a2a;
+  overflow: hidden;
+}
+
+.usaco-contest-sidebar {
+  border-right: 1px solid #2a2a2a;
+  background: #141414;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.usaco-q-tabs {
+  display: flex;
+  border-bottom: 1px solid #2a2a2a;
+  background: #1b1b1b;
+  flex-shrink: 0;
+}
+
+.usaco-q-tab {
+  flex: 1;
+  padding: 0.5rem 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #6f6f6f;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.usaco-q-tab.active {
+  color: #4e8df7;
+  border-bottom-color: #4e8df7;
+}
+
+.usaco-problem-scroll {
+  overflow: auto;
+  min-height: 0;
+  padding: 1rem 1.1rem;
+}
+
+.usaco-problem-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.usaco-problem-scroll::-webkit-scrollbar-thumb {
+  background: #3b3b3b;
+  border-radius: 4px;
+}
+
+.usaco-problem-title {
+  margin: 0 0 0.5rem;
+  color: #ececec;
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.usaco-problem-meta {
+  display: flex;
+  gap: 0.4rem 0.75rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin-bottom: 0.85rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #2a2a2a;
+  color: #9f9f9f;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.usaco-problem-scroll section {
+  margin-bottom: 0.85rem;
+}
+
+.usaco-problem-scroll h3 {
+  margin: 0 0 0.38rem;
+  color: #ebebeb;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.usaco-problem-scroll p {
+  margin: 0;
+  color: #acacac;
+  font-size: 0.84rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.usaco-io-box {
+  border: 1px solid #2d2d2d;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.usaco-io-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #202020;
+  border-bottom: 1px solid #2d2d2d;
+  padding: 0.28rem 0.55rem;
+}
+
+.usaco-io-head span {
+  font-size: 0.7rem;
+  color: #7c7c7c;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.usaco-io-box pre {
+  margin: 0;
+  padding: 0.5rem 0.65rem;
+  color: #ececec;
+  background: #181818;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  font-family: Consolas, "Courier New", monospace;
+  white-space: pre-wrap;
+}
+
+.usaco-copy-btn {
+  border: 1px solid #3a3a3a;
+  border-radius: 6px;
+  background: #242424;
+  color: #bfbfbf;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.usaco-scoring-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: #acacac;
+  font-size: 0.82rem;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.usaco-editor-pane {
+  display: grid;
+  grid-template-rows: 38px minmax(0, 1fr) auto 150px 48px;
+  min-height: 0;
+  background: #111;
+}
+
+.usaco-editor-top {
+  height: 42px;
+  border-bottom: 1px solid #2a2a2a;
+  background: #171717;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 10px;
+}
+
+.usaco-editor-tabs {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.usaco-file-tab {
+  height: 36px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border-right: 1px solid #2a2a2a;
+  border-left: 0;
+  border-top: 0;
+  background: transparent;
+  color: #f0f0f0;
+  border-bottom: 2px solid transparent;
+  font-family: Consolas, "Courier New", monospace;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.usaco-file-tab.active {
+  border-bottom-color: #4e8df7;
+}
+
+.usaco-new-file-btn {
+  height: 30px;
+  min-width: 92px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  border-radius: 8px;
+  border: 1px solid #2f2f2f;
+  background: #1d1d1d;
+  color: #e3e3e3;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.usaco-new-file-btn span {
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.usaco-new-file-btn:hover {
+  background: #232323;
+  border-color: #3c3c3c;
+}
+
+.usaco-file-create-inline {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  border-right: 1px solid #2a2a2a;
+}
+
+.usaco-file-create-panel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.usaco-file-create-input {
+  height: 32px;
+  min-width: 220px;
+  border-radius: 8px;
+  border: 1px solid #2f2f2f;
+  background: #121212;
+  color: #efefef;
+  padding: 0 10px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+}
+
+.usaco-file-create-input:focus {
+  outline: none;
+  border-color: #4e8df7;
+  box-shadow: 0 0 0 1px rgba(78, 141, 247, 0.45);
+}
+
+.usaco-file-create-error {
+  margin: -6px 0 0;
+  font-size: 12px;
+  color: #ff8383;
+}
+
+.usaco-editor-empty {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #a9a9a9;
+}
+
+.usaco-editor-empty-card {
+  width: min(520px, 100%);
+  border: 1px solid #2e2e2e;
+  background: #151515;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.usaco-editor-empty h4 {
+  margin: 0;
+  color: #f0f0f0;
+  font-size: 20px;
+}
+
+.usaco-editor-empty p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #b5b5b5;
+}
+
+.usaco-editor-wrap {
+  min-height: 0;
+}
+
+.usaco-run-input-wrap {
+  flex-shrink: 0;
+  border-top: 1px solid #2a2a2a;
+  border-bottom: 1px solid #2a2a2a;
+  background: #171717;
+}
+
+.usaco-run-input-head {
+  background: #1a1a1a;
+  border-bottom: 1px solid #2a2a2a;
+  color: #767676;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.35rem 0.85rem;
+}
+
+.usaco-run-input {
+  width: 100%;
+  min-height: 74px;
+  max-height: 140px;
+  border: 0;
+  border-radius: 0;
+  resize: vertical;
+  padding: 0.55rem 0.85rem;
+  color: #ececec;
+  background: #101010;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.usaco-run-input:focus {
+  outline: none;
+}
+
+.usaco-output-wrap {
+  flex-shrink: 0;
+  border-top: 1px solid #2a2a2a;
+  background: #0f0f0f;
+  height: 150px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.usaco-output-head {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #2a2a2a;
+  background: #1a1a1a;
+  color: #767676;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.28rem 0.85rem;
+  flex-shrink: 0;
+}
+
+.usaco-output-body {
+  margin: 0;
+  flex: 1;
+  overflow: auto;
+  padding: 0.5rem 0.85rem;
+  color: #bcbcbc;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.usaco-action-bar {
+  flex-shrink: 0;
+  height: 48px;
+  border-top: 1px solid #2a2a2a;
+  background: #181818;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0 1rem;
+}
+
+.usaco-lang-select,
+.usaco-run-btn,
+.usaco-submit-btn,
+.usaco-reset-btn {
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid #2f2f2f;
+  background: #1f1f1f;
+  color: #ececec;
+  padding: 0 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.usaco-run-btn {
+  border-color: #1f5f35;
+  color: #53d386;
+  background: #142017;
+  cursor: pointer;
+}
+
+.usaco-submit-btn {
+  border-color: #215bc7;
+  background: #18428f;
+  color: #fff;
+  cursor: pointer;
+}
+
+.usaco-reset-btn {
+  cursor: pointer;
+}
+
+.usaco-action-spacer {
+  flex: 1;
+}
+
+.usaco-score-mini {
+  color: #b4b4b4;
+  font-size: 0.8rem;
+  font-family: Consolas, "Courier New", monospace;
+}
+
+.usaco-timer {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 14px;
+  font-weight: 800;
+  color: #58d583;
+  background: #132117;
+  border: 1px solid #24553a;
+  border-radius: 8px;
+  padding: 7px 10px;
+}
+
+.usaco-timer.danger {
+  color: #ff6363;
+  background: #2a1010;
+  border-color: #7a2626;
+}
+
+.usaco-page-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.usaco-page-head h1 {
+  margin: 0;
+  font-size: 32px;
+  color: #f0f0f0;
+}
+
+.usaco-page-head p {
+  margin: 8px 0 0;
+  color: #9d9d9d;
+}
+
+.usaco-card {
+  margin-top: 16px;
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.usaco-table-wrap {
+  overflow-x: auto;
+}
+
+.usaco-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.usaco-table th,
+.usaco-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid #2a2a2a;
+  color: #dbdbdb;
+  font-size: 14px;
+}
+
+.usaco-table th {
+  color: #8f8f8f;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.usaco-table tr.me td {
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.usaco-table a {
+  color: #84b5ff;
+  text-decoration: none;
+}
+
+.usaco-table a:hover {
+  text-decoration: underline;
+}
+
+.usaco-past-section h2 {
+  margin: 0 0 12px;
+  color: #f0f0f0;
+}
+
+.usaco-past-list {
+  display: grid;
+  gap: 8px;
+}
+
+.usaco-past-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: #1b1b1b;
+  border: 1px solid #2d2d2d;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.usaco-past-item strong {
+  display: block;
+  color: #ebebeb;
+  font-size: 14px;
+}
+
+.usaco-past-item span {
+  color: #979797;
+  font-size: 12px;
+}
+
+.usaco-past-item a {
+  border: 1px solid #3669c7;
+  background: #1d4c9d;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.usaco-profile-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.usaco-profile-top h2 {
+  margin: 0 0 8px;
+  color: #f0f0f0;
+}
+
+.usaco-profile-top p {
+  margin: 4px 0;
+  color: #ababab;
+}
+
+.usaco-profile-stats {
+  display: flex;
+  gap: 10px;
+}
+
+.usaco-profile-stats div {
+  min-width: 90px;
+  border: 1px solid #2d2d2d;
+  background: #1b1b1b;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.usaco-profile-stats span {
+  display: block;
+  color: #8f8f8f;
+  font-size: 12px;
+}
+
+.usaco-profile-stats strong {
+  color: #ebebeb;
+  font-size: 18px;
+}
+
+.usaco-empty {
+  color: #8d8d8d;
+  margin: 12px 0 0;
+}
+
+@media (max-width: 1080px) {
+  .usaco-hero {
+    grid-template-columns: 1fr;
+    padding: 3rem 5%;
+  }
+
+  .usaco-feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .usaco-division-track {
+    flex-direction: column;
+  }
+
+  .usaco-division-node::after {
+    content: "↓";
+    position: static;
+    transform: none;
+    display: block;
+    margin-top: 0.35rem;
+  }
+
+  .usaco-contest-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: 45% 55%;
+    height: calc(100vh - 108px);
+  }
+
+  .usaco-contest-sidebar {
+    border-right: 0;
+    border-bottom: 1px solid #2a2a2a;
+  }
+
+  .usaco-editor-pane {
+    grid-template-rows: 38px minmax(0, 1fr) auto 140px 48px;
+  }
+}
+
+@media (max-width: 700px) {
+  .usaco-contest-root {
+    padding: 0;
+  }
+
+  .usaco-contest-main {
+    height: calc(100vh - 108px);
+  }
+
+  .usaco-action-bar {
+    gap: 6px;
+    padding: 0 8px;
+    overflow-x: auto;
+  }
+}
+
+/* USACO contest/ui tuning overrides */
+.usaco-main-division {
+  font-size: 11px;
+  color: #7a7a7a;
+  background: #1e1e1e;
+  border: 1px solid #2e2e2e;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-weight: 700;
+}
+
+.usaco-subnav-inner {
+  max-width: 1400px;
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr) 180px;
+  align-items: center;
+  gap: 12px;
+}
+
+.usaco-sub-left {
+  color: #6f6f6f;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.usaco-sub-links {
+  justify-content: center;
+}
+
+.usaco-sub-right-spacer {
+  width: 100%;
+}
+
+.usaco-terminal pre {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.usaco-term-line {
+  display: block;
+}
+
+.usaco-term-line.cmd {
+  color: #4aa3ff;
+}
+
+.usaco-term-line.ok {
+  color: #2fd27f;
+}
+
+.usaco-term-line.score {
+  color: #f5b73d;
+  font-weight: 700;
+}
+
+.usaco-term-line.promo {
+  color: #648bff;
+}
+
+.usaco-problem-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.usaco-problem-meta span svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+}
+
+.usaco-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.usaco-tag-pill {
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 700;
+  color: #8ec2ff;
+  border: 1px solid #285488;
+  background: #10233a;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+.usaco-submission-log {
+  display: grid;
+  gap: 4px;
+  margin-top: 4px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.usaco-submission-log-item {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 5px;
+  padding: 5px 8px;
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 11px;
+  color: #b9b9b9;
+  line-height: 1.45;
+}
+
+.usaco-submission-log-item.ok {
+  border-left: 3px solid #32c26a;
+  color: #d7f3e2;
+}
+
+.usaco-submission-log-item.err {
+  border-left: 3px solid #e65b5b;
+  color: #ffd5d5;
+}
+
+.usaco-output-head {
+  gap: 8px;
+}
+
+.usaco-output-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #777;
+  display: inline-block;
+}
+
+.usaco-output-dot.running {
+  background: #f1c04d;
+}
+
+.usaco-output-dot.ok {
+  background: #4bd483;
+}
+
+.usaco-output-dot.err {
+  background: #ff6363;
+}
+
+.usaco-output-body.ok {
+  color: #74e8a2;
+}
+
+.usaco-output-body.err {
+  color: #ff5d5d;
+}
+
+.usaco-output-body.running {
+  color: #f4d17b;
+}
+
+/* Keep final terminal line colors after fixing broken rules above */
+.usaco-terminal pre .usaco-term-line.cmd {
+  color: #4aa3ff;
+}
+
+.usaco-terminal pre .usaco-term-line.ok {
+  color: #2fd27f;
+}
+
+.usaco-terminal pre .usaco-term-line.score {
+  color: #f5b73d;
+  font-weight: 700;
+}
+
+.usaco-terminal pre .usaco-term-line.promo {
+  color: #648bff;
+}
+
+.usaco-past-chooser-card {
+  margin-top: 16px;
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.usaco-past-chooser-title {
+  margin: 0 0 14px;
+  color: #f0f0f0;
+  font-size: 32px;
+}
+
+.usaco-past-chooser-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.usaco-past-select-btn,
+.usaco-past-back-btn,
+.usaco-past-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #3b3b3b;
+  border-radius: 8px;
+  background: #1a1a1a;
+  color: #e0e0e0;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 14px;
+}
+
+.usaco-past-select-btn:hover,
+.usaco-past-back-btn:hover,
+.usaco-past-view-btn:hover {
+  background: #222;
+}
+
+.usaco-past-contest-block {
+  margin-top: 16px;
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.usaco-past-contest-title {
+  margin: 0 0 14px;
+  color: #f0f0f0;
+  font-size: 34px;
+}
+
+.usaco-past-division-head {
+  margin: 0 0 10px;
+  color: #efefef;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.usaco-past-problem-list {
+  display: grid;
+  gap: 10px;
+}
+
+.usaco-past-problem-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #2d2d2d;
+  border-radius: 8px;
+  background: #1b1b1b;
+  padding: 10px 12px;
+}
+
+.usaco-past-problem-name {
+  color: #ededed;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+@media (max-width: 1080px) {
+  .usaco-subnav-inner {
+    grid-template-columns: 1fr;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    height: auto;
+  }
+
+  .usaco-sub-left,
+  .usaco-sub-right-spacer {
+    display: none;
+  }
+
+  .usaco-sub-links {
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+}
+
