@@ -3,7 +3,7 @@ import path from "node:path";
 import Database from "better-sqlite3";
 import { Client } from "pg";
 
-type EnvMap = Record<string, string>;
+type EnvMap = Record<string, string | undefined>;
 
 const TABLE_ORDER = [
   "User",
