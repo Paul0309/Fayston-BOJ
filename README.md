@@ -1,8 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Deploy Notes (Vercel + Free DB)
 
-## Getting Started
+This project is configured for Prisma + PostgreSQL.
 
-First, run the development server:
+Recommended free database: Neon (serverless Postgres free tier).
+
+Set these environment variables in Vercel:
+
+- `DATABASE_URL`: Neon Postgres connection string
+- `NEXTAUTH_SECRET`: random strong string
+- `NEXTAUTH_URL`: your production URL (for example `https://faystonboj.vercel.app`)
+- `OPENAI_API_KEY`: your OpenAI API key
+
+Build command uses `prisma db push`, so schema is applied automatically on deploy.
+
+## Local Development
+
+Run:
 
 ```bash
 npm run dev

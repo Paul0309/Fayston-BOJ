@@ -6,7 +6,7 @@
     "dev": "next dev",
     "dev:worker": "tsx scripts/judge-worker.ts",
     "worker": "tsx scripts/judge-worker.ts",
-    "build": "next build",
+    "build": "prisma generate && prisma db push && next build",
     "start": "next start",
     "lint": "eslint"
   },

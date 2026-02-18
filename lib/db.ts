@@ -21,6 +21,10 @@ function buildDatabaseUrl() {
     return raw;
 }
 
+function isFileDatabaseUrl(url: string | undefined) {
+    return Boolean(url && url.startsWith("file:"));
+}
+
 declare global {
     var prisma: PrismaClient | undefined;
     var prismaInitPromise: Promise<void> | undefined;
@@ -38,10 +42,13 @@ if (!globalThis.prismaInitPromise) {
     globalThis.prismaInitPromise = (async () => {
         try {
             await db.$connect();
-            await db.$queryRawUnsafe("PRAGMA journal_mode = WAL;");
-            await db.$queryRawUnsafe("PRAGMA synchronous = NORMAL;");
-            await db.$queryRawUnsafe("PRAGMA busy_timeout = 10000;");
-            await db.$queryRawUnsafe("PRAGMA foreign_keys = ON;");
+            const raw = process.env.DATABASE_URL;
+            if (isFileDatabaseUrl(raw)) {
+                await db.$queryRawUnsafe("PRAGMA journal_mode = WAL;");
+                await db.$queryRawUnsafe("PRAGMA synchronous = NORMAL;");
+                await db.$queryRawUnsafe("PRAGMA busy_timeout = 10000;");
+                await db.$queryRawUnsafe("PRAGMA foreign_keys = ON;");
+            }
         } catch (error) {
             console.error("[DB_INIT]", error);
         }
