@@ -165,7 +165,7 @@ export default async function UserProfilePage(props: PageProps) {
       FROM "Submission"
       WHERE "userId" = ${id}
         AND ("detail" IS NULL OR "detail" NOT LIKE '%"hiddenInStatus":true%')
-        AND "createdAt" >= DATETIME('now', '-59 days')
+        AND "createdAt" >= (NOW() - INTERVAL '59 days')
       GROUP BY DATE("createdAt")
       ORDER BY "day" ASC
     `),
