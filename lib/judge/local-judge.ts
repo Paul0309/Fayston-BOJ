@@ -48,7 +48,7 @@ const LANG_CONFIG: Record<string, {
         extension: "cpp"
     },
     python: {
-        run: (filePath) => ({ cmd: "python", args: ["-u", filePath] }),
+        run: (filePath) => ({ cmd: "python3", args: ["-u", filePath] }),
         extension: "py"
     },
     javascript: {

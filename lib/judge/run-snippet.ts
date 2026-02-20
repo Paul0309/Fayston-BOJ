@@ -37,7 +37,7 @@ const LANG_CONFIG: Record<
   },
   python: {
     extension: "py",
-    run: (filePath) => ({ cmd: "python", args: ["-u", filePath] })
+    run: (filePath) => ({ cmd: "python3", args: ["-u", filePath] })
   },
   javascript: {
     extension: "js",
@@ -180,4 +180,3 @@ export async function runSnippet(params: {
     await fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {});
   }
 }
-
