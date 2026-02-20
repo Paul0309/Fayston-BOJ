@@ -51,6 +51,12 @@ type PerProblemState = {
   runInput: string;
 };
 
+type ContestSnapshot = {
+  startAt?: number;
+  selectedId?: string;
+  states?: Record<string, PerProblemState>;
+};
+
 interface UsacoContestClientProps {
   division: string;
   userId: string;
@@ -101,20 +107,51 @@ function languageFromFilename(name: string): SupportedLanguage | null {
   return EXTENSION_TO_LANGUAGE[ext] || null;
 }
 
+function getDefaultStates(problems: ContestProblem[]): Record<string, PerProblemState> {
+  return Object.fromEntries(
+    problems.map((p) => [
+      p.id,
+      {
+        files: [],
+        activeFileId: null,
+        runInput: p.firstSampleInput || ""
+      }
+    ])
+  );
+}
+
 function getInitialContestState(division: string, userId: string, problems: ContestProblem[]) {
-  const fallback = { startAt: Date.now(), selectedId: problems[0]?.id || "" };
+  const fallback = { startAt: Date.now(), selectedId: problems[0]?.id || "", states: getDefaultStates(problems) };
   if (typeof window === "undefined") return fallback;
   const key = `usaco-contest:${division}:${userId}`;
   const raw = localStorage.getItem(key);
   if (!raw) return fallback;
   try {
-    const parsed = JSON.parse(raw) as { startAt?: number; selectedId?: string };
+    const parsed = JSON.parse(raw) as ContestSnapshot;
+    const mergedStates = { ...fallback.states };
+    const parsedStates = parsed.states || {};
+    for (const problem of problems) {
+      const saved = parsedStates[problem.id];
+      if (!saved) continue;
+      const files = Array.isArray(saved.files)
+        ? saved.files.filter((f) => typeof f?.id === "string" && typeof f?.name === "string" && typeof f?.code === "string")
+        : [];
+      const activeFileId = typeof saved.activeFileId === "string" && files.some((f) => f.id === saved.activeFileId) ? saved.activeFileId : null;
+      const runInput = typeof saved.runInput === "string" ? saved.runInput : mergedStates[problem.id].runInput;
+      mergedStates[problem.id] = {
+        files,
+        activeFileId,
+        runInput
+      };
+    }
+
     return {
       startAt: typeof parsed.startAt === "number" ? parsed.startAt : fallback.startAt,
       selectedId:
         typeof parsed.selectedId === "string" && problems.some((p) => p.id === parsed.selectedId)
           ? parsed.selectedId
-          : fallback.selectedId
+          : fallback.selectedId,
+      states: mergedStates
     };
   } catch {
     return fallback;
@@ -184,18 +221,7 @@ export default function UsacoContestClient({
   const [remainingMs, setRemainingMs] = useState<number>(CONTEST_MS);
   const [statuses, setStatuses] = useState<Record<string, LatestStatus | undefined>>(initialStatuses);
   const [logsByProblem, setLogsByProblem] = useState<Record<string, LatestStatus[]>>(initialLogsByProblem);
-  const [states, setStates] = useState<Record<string, PerProblemState>>(() =>
-    Object.fromEntries(
-      problems.map((p) => [
-        p.id,
-        {
-          files: [],
-          activeFileId: null,
-          runInput: p.firstSampleInput || ""
-        }
-      ])
-    )
-  );
+  const [states, setStates] = useState<Record<string, PerProblemState>>(initial.states);
   const [runBusy, setRunBusy] = useState(false);
   const [runStatus, setRunStatus] = useState("-");
   const [runStdout, setRunStdout] = useState("");
@@ -220,8 +246,8 @@ export default function UsacoContestClient({
   const isJudgePending = selectedLatest?.status === "PENDING";
 
   useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify({ startAt, selectedId }));
-  }, [storageKey, startAt, selectedId]);
+    localStorage.setItem(storageKey, JSON.stringify({ startAt, selectedId, states }));
+  }, [storageKey, startAt, selectedId, states]);
 
   useEffect(() => {
     setFileCreatorOpen(false);
