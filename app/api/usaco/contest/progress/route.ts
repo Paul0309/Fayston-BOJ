@@ -4,9 +4,12 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getSessionUser } from "@/lib/session-user";
 import { db } from "@/lib/db";
 import { decodeSubmissionDetail } from "@/lib/submission-meta";
+import { processJudgeQueue } from "@/lib/judge/queue";
 
 export async function GET(req: Request) {
   try {
+    await processJudgeQueue(2).catch(() => {});
+
     const session = await getServerSession(authOptions);
     const user = getSessionUser(session);
     if (!user.id) return new NextResponse("Unauthorized", { status: 401 });
@@ -24,9 +27,11 @@ export async function GET(req: Request) {
     const rows = await db.submission.findMany({
       where: {
         userId: user.id,
-        problemId: { in: ids }
+        problemId: { in: ids },
+        detail: { contains: '"hiddenInStatus":true' }
       },
       orderBy: { createdAt: "desc" },
+      take: 200,
       select: {
         id: true,
         problemId: true,

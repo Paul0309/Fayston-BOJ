@@ -1,8 +1,6 @@
 ﻿import Link from "next/link";
 import { USACO_DIVISIONS } from "@/lib/usaco/problem-bank";
 
-export const dynamic = "force-dynamic";
-
 const DIV_META: Record<string, { sub: string; cls: string }> = {
   Bronze: { sub: "Start here", cls: "bronze" },
   Silver: { sub: "Prefix sums, sets", cls: "silver" },

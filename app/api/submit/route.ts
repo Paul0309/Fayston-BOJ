@@ -5,7 +5,7 @@ import { authOptions } from "../auth/[...nextauth]/route";
 import { getSessionUser } from "@/lib/session-user";
 import { getAllowedLanguages } from "@/lib/language-settings";
 import { isSupportedLanguage } from "@/lib/languages";
-import { enqueueSubmissionForJudge } from "@/lib/judge/queue";
+import { enqueueSubmissionForJudge, processJudgeQueue } from "@/lib/judge/queue";
 import { parseCodeVisibility } from "@/lib/code-visibility";
 
 export async function POST(req: Request) {
@@ -44,6 +44,7 @@ export async function POST(req: Request) {
         });
 
         await enqueueSubmissionForJudge(submission.id);
+        await processJudgeQueue(1).catch(() => {});
 
         return NextResponse.json({
             ok: true,

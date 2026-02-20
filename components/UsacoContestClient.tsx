@@ -5,6 +5,7 @@ import Editor from "@monaco-editor/react";
 import { Clock3, Microchip, Plus } from "lucide-react";
 import type { SupportedLanguage } from "@/lib/languages";
 import { LANGUAGE_META } from "@/lib/languages";
+import MarkdownMath from "@/components/MarkdownMath";
 
 type ContestProblem = {
   id: string;
@@ -480,15 +481,15 @@ export default function UsacoContestClient({
 
               <section>
                 <h3>Problem</h3>
-                <p>{selected.description}</p>
+                <MarkdownMath className="prose prose-invert max-w-none text-neutral-100" statementMode content={selected.description} />
               </section>
               <section>
                 <h3>Input</h3>
-                <p>{selected.inputDesc || "-"}</p>
+                <MarkdownMath className="prose prose-invert max-w-none text-neutral-100" statementMode content={selected.inputDesc || "-"} />
               </section>
               <section>
                 <h3>Output</h3>
-                <p>{selected.outputDesc || "-"}</p>
+                <MarkdownMath className="prose prose-invert max-w-none text-neutral-100" statementMode content={selected.outputDesc || "-"} />
               </section>
 
               <section>

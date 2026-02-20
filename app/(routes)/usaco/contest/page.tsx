@@ -5,8 +5,6 @@ import { getSessionUser } from "@/lib/session-user";
 import { db } from "@/lib/db";
 import UsacoContestClient from "@/components/UsacoContestClient";
 import { getAllowedLanguages } from "@/lib/language-settings";
-import { syncUsacoBankToDb } from "@/lib/usaco/sync";
-import { USACO_DIVISIONS } from "@/lib/usaco/problem-bank";
 import { decodeSubmissionDetail } from "@/lib/submission-meta";
 
 const DIVISIONS = ["Bronze", "Silver", "Gold", "Platinum"] as const;
@@ -30,13 +28,6 @@ export default async function UsacoContestPage() {
   const division = asDivision(userProfile?.division || user.division);
   const divisionTag = `division:${division.toLowerCase()}`;
   const allowedLanguages = await getAllowedLanguages();
-
-  const usacoCount = await db.problem.count({
-    where: { tags: { contains: "usaco" } }
-  });
-  if (usacoCount < 12) {
-    await syncUsacoBankToDb(USACO_DIVISIONS);
-  }
 
   const problems = await db.problem.findMany({
     where: {
@@ -66,9 +57,11 @@ export default async function UsacoContestPage() {
   const statuses = await db.submission.findMany({
     where: {
       userId: user.id,
-      problemId: { in: problems.map((p) => p.id) }
+      problemId: { in: problems.map((p) => p.id) },
+      detail: { contains: '"hiddenInStatus":true' }
     },
     orderBy: { createdAt: "desc" },
+    take: 200,
     select: {
       id: true,
       problemId: true,
