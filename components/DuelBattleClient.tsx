@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { editor as MonacoEditorType } from "monaco-editor";
 import { LANGUAGE_META, type SupportedLanguage } from "@/lib/languages";
 import MarkdownMath from "@/components/MarkdownMath";
 
@@ -65,9 +66,12 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
   } | null>(null);
   const [showFinishOverlay, setShowFinishOverlay] = useState(false);
   const [confettiSeed, setConfettiSeed] = useState(0);
+  const opponentEditorRef = useRef<MonacoEditorType.IStandaloneCodeEditor | null>(null);
+  const monacoRef = useRef<typeof import("monaco-editor") | null>(null);
+  const opponentDecorationIdsRef = useRef<string[]>([]);
   const finished = state?.battle.status === "FINISHED";
 
-  const loadState = async () => {
+  const loadState = useCallback(async () => {
     try {
       const res = await fetch(`/api/duel/battle/${battleId}/state`, { cache: "no-store" });
       if (!res.ok) throw new Error(await res.text());
@@ -79,16 +83,16 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
     } finally {
       setLoading(false);
     }
-  };
+  }, [battleId]);
 
   useEffect(() => {
     void loadState();
-  }, [battleId]);
+  }, [loadState]);
 
   useEffect(() => {
     const timer = setInterval(() => void loadState(), 2000);
     return () => clearInterval(timer);
-  }, [battleId]);
+  }, [loadState]);
 
   useEffect(() => {
     const timer = setInterval(() => setNowTick(Date.now()), 1000);
@@ -137,6 +141,46 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
       setConfettiSeed((v) => v + 1);
     }
   }, [finished]);
+
+  useEffect(() => {
+    const editor = opponentEditorRef.current;
+    const monaco = monacoRef.current;
+    if (!editor || !monaco) return;
+
+    const raw = opponentDraft?.cursorMeta;
+    if (!raw) {
+      opponentDecorationIdsRef.current = editor.deltaDecorations(opponentDecorationIdsRef.current, []);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as {
+        line: number;
+        column: number;
+        selectionStartLine: number;
+        selectionStartColumn: number;
+        selectionEndLine: number;
+        selectionEndColumn: number;
+      };
+      opponentDecorationIdsRef.current = editor.deltaDecorations(opponentDecorationIdsRef.current, [
+        {
+          range: new monaco.Range(parsed.line || 1, parsed.column || 1, parsed.line || 1, Math.max((parsed.column || 1) + 1, 2)),
+          options: { inlineClassName: "duel-opp-cursor" }
+        },
+        {
+          range: new monaco.Range(
+            parsed.selectionStartLine || parsed.line || 1,
+            parsed.selectionStartColumn || parsed.column || 1,
+            parsed.selectionEndLine || parsed.line || 1,
+            parsed.selectionEndColumn || parsed.column || 1
+          ),
+          options: { inlineClassName: "duel-opp-selection" }
+        }
+      ]);
+    } catch {
+      opponentDecorationIdsRef.current = editor.deltaDecorations(opponentDecorationIdsRef.current, []);
+    }
+  }, [opponentDraft]);
 
   const remaining = useMemo(() => {
     if (!state) return 0;
@@ -254,7 +298,7 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
         </section>
       </aside>
 
-      <section className="rounded-xl border border-neutral-700 bg-neutral-900 flex flex-col">
+      <section className="rounded-xl border border-neutral-700 bg-neutral-900 flex min-h-0 flex-col overflow-hidden">
         <div className="border-b border-neutral-700 p-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             {langs.map((lang) => (
@@ -281,11 +325,10 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
             {submitBusy ? "Submitting..." : "Submit"}
           </button>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 h-[65vh] min-h-[420px] max-h-[780px] flex-none">
-          <div className="border-r border-neutral-700">
+        <div className="grid grid-cols-1 lg:grid-cols-2 h-[65vh] min-h-[420px] max-h-[780px] min-h-0 flex-none overflow-hidden">
+          <div className="min-h-0 overflow-hidden border-r border-neutral-700">
             <div className="px-3 py-1 text-xs text-neutral-400 border-b border-neutral-700">My code</div>
             <Editor
-              key={opponentDraft?.updatedAt || "opp-editor"}
               height="100%"
               theme="vs-dark"
               language={LANGUAGE_META[language].monaco}
@@ -323,7 +366,7 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
               }}
             />
           </div>
-          <div>
+          <div className="min-h-0 overflow-hidden">
             <div className="px-3 py-1 text-xs text-neutral-400 border-b border-neutral-700">
               Opponent live code {opponentDraft?.updatedAt ? `(${new Date(opponentDraft.updatedAt).toLocaleTimeString()})` : ""}
             </div>
@@ -333,43 +376,8 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
               language={LANGUAGE_META[(opponentDraft?.language as SupportedLanguage) || "python"].monaco}
               value={opponentDraft?.code || "// Waiting for opponent draft..."}
               onMount={(editor, monaco) => {
-                const raw = opponentDraft?.cursorMeta;
-                if (!raw) return;
-                try {
-                  const parsed = JSON.parse(raw) as {
-                    line: number;
-                    column: number;
-                    selectionStartLine: number;
-                    selectionStartColumn: number;
-                    selectionEndLine: number;
-                    selectionEndColumn: number;
-                  };
-                  editor.deltaDecorations(
-                    [],
-                    [
-                      {
-                        range: new monaco.Range(
-                          parsed.line || 1,
-                          parsed.column || 1,
-                          parsed.line || 1,
-                          Math.max((parsed.column || 1) + 1, 2)
-                        ),
-                        options: { inlineClassName: "duel-opp-cursor" }
-                      },
-                      {
-                        range: new monaco.Range(
-                          parsed.selectionStartLine || parsed.line || 1,
-                          parsed.selectionStartColumn || parsed.column || 1,
-                          parsed.selectionEndLine || parsed.line || 1,
-                          parsed.selectionEndColumn || parsed.column || 1
-                        ),
-                        options: { inlineClassName: "duel-opp-selection" }
-                      }
-                    ]
-                  );
-                } catch {
-                  // ignore parse error
-                }
+                opponentEditorRef.current = editor;
+                monacoRef.current = monaco;
               }}
               options={{
                 readOnly: true,
