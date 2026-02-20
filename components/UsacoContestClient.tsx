@@ -177,7 +177,7 @@ export default function UsacoContestClient({
   initialLogsByProblem
 }: UsacoContestClientProps) {
   const initial = getInitialContestState(division, userId, problems);
-  const runEnabled = process.env.NEXT_PUBLIC_ENABLE_REMOTE_RUN === "1" || process.env.NODE_ENV !== "production";
+  const runEnabled = process.env.NEXT_PUBLIC_ENABLE_REMOTE_RUN !== "0";
 
   const [selectedId, setSelectedId] = useState(initial.selectedId);
   const [startAt, setStartAt] = useState<number>(initial.startAt);

@@ -3,7 +3,7 @@ import { spawn } from "child_process";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
-import { encodeSubmissionDetail, type SubmissionGroupScoreMeta } from "@/lib/submission-meta";
+import { decodeSubmissionDetail, encodeSubmissionDetail, type SubmissionGroupScoreMeta } from "@/lib/submission-meta";
 
 type JudgeResult = {
     status: "ACCEPTED" | "PARTIAL" | "WRONG_ANSWER" | "TLE" | "RUNTIME_ERROR" | "COMPILATION_ERROR";
@@ -343,9 +343,19 @@ async function updateStatus(
 ) {
     const submission = await db.submission.findUnique({
         where: { id },
-        select: { codeVisibility: true }
+        select: { codeVisibility: true, detail: true }
     });
     const visibility = submission?.codeVisibility || "PRIVATE";
+    const previous = decodeSubmissionDetail(submission?.detail);
+    const incoming = decodeSubmissionDetail(extras?.detail);
+    const mergedMeta =
+        previous.meta || incoming.meta
+            ? {
+                  ...(previous.meta || {}),
+                  ...(incoming.meta || {})
+              }
+            : undefined;
+    const mergedDetail = encodeSubmissionDetail(incoming.message || extras?.detail || "", mergedMeta);
 
     return db.submission.update({
         where: { id },
@@ -354,7 +364,7 @@ async function updateStatus(
             isPublic: visibility === "PUBLIC" || (visibility === "ACCEPTED_ONLY" && status === "ACCEPTED"),
             timeUsed: time,
             memoryUsed: memory,
-            detail: extras?.detail,
+            detail: mergedDetail,
             failedCase: extras?.failedCase,
             expectedOutput: extras?.expectedOutput,
             actualOutput: extras?.actualOutput,

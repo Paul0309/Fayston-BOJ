@@ -1,4 +1,5 @@
 import { processJudgeQueue } from "../lib/judge/queue";
+import { processRunQueue } from "../lib/judge/run-queue";
 
 const POLL_MS = Number(process.env.JUDGE_WORKER_POLL_MS || "1500");
 const MAX_JOBS = Number(process.env.JUDGE_WORKER_MAX_JOBS || "2");
@@ -10,11 +11,12 @@ let stopped = false;
 
 async function runOnce() {
   try {
-    const res = await processJudgeQueue(MAX_JOBS);
-    if (res.processed > 0) {
-      console.log(`[judge-worker] processed=${res.processed}`);
+    const [judgeRes, runRes] = await Promise.all([processJudgeQueue(MAX_JOBS), processRunQueue(MAX_JOBS)]);
+    const total = judgeRes.processed + runRes.processed;
+    if (total > 0) {
+      console.log(`[judge-worker] judge=${judgeRes.processed} run=${runRes.processed}`);
     }
-    return res;
+    return { judge: judgeRes.processed, run: runRes.processed };
   } catch (e) {
     console.error("[judge-worker] error", e);
     throw e;
@@ -46,4 +48,3 @@ process.on("SIGTERM", () => {
   console.log("[judge-worker] stopping...");
   process.exit(0);
 });
-

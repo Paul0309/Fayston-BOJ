@@ -35,7 +35,7 @@ export default function SubmitForm({
 }: SubmitFormProps) {
   const router = useRouter();
   const completionRegisteredRef = useRef(false);
-  const runEnabled = process.env.NEXT_PUBLIC_ENABLE_REMOTE_RUN === "1" || process.env.NODE_ENV !== "production";
+  const runEnabled = process.env.NEXT_PUBLIC_ENABLE_REMOTE_RUN !== "0";
 
   const languages = useMemo(() => {
     const source = allowedLanguages && allowedLanguages.length > 0 ? allowedLanguages : DEFAULT_ALLOWED_LANGUAGES;

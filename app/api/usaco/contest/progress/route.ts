@@ -24,8 +24,7 @@ export async function GET(req: Request) {
     const rows = await db.submission.findMany({
       where: {
         userId: user.id,
-        problemId: { in: ids },
-        detail: { contains: '"hiddenInStatus":true' }
+        problemId: { in: ids }
       },
       orderBy: { createdAt: "desc" },
       take: 200,

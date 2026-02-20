@@ -3,14 +3,13 @@ import { db } from "@/lib/db";
 import { getAllowedLanguages } from "@/lib/language-settings";
 import { isSupportedLanguage } from "@/lib/languages";
 import { runSnippet } from "@/lib/judge/run-snippet";
+import { enqueueRunJob, getRunJobById } from "@/lib/judge/run-queue";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
+import { getSessionUser } from "@/lib/session-user";
 
 export async function POST(req: Request) {
   try {
-    const runEnabled = process.env.ENABLE_REMOTE_RUN === "1" || !process.env.VERCEL;
-    if (!runEnabled) {
-      return new NextResponse("Run is disabled in this deployment. Use Submit for judging.", { status: 503 });
-    }
-
     const body = await req.json();
     const problemId = typeof body?.problemId === "string" ? body.problemId : "";
     const code = typeof body?.code === "string" ? body.code : "";
@@ -37,14 +36,67 @@ export async function POST(req: Request) {
       return new NextResponse("Problem not found", { status: 404 });
     }
 
-    const result = await runSnippet({
-      code,
+    // Local dev can execute directly.
+    if (!process.env.VERCEL) {
+      const result = await runSnippet({
+        code,
+        language,
+        input,
+        timeLimitMs: problem.timeLimit + 1000
+      });
+      return NextResponse.json(result);
+    }
+
+    // On Vercel, enqueue run job and let EC2 worker execute it.
+    const session = await getServerSession(authOptions);
+    const userId = getSessionUser(session).id || null;
+    const jobId = await enqueueRunJob({
+      userId,
+      problemId,
       language,
+      code,
       input,
       timeLimitMs: problem.timeLimit + 1000
     });
 
-    return NextResponse.json(result);
+    const started = Date.now();
+    const timeoutMs = 15000;
+    while (Date.now() - started < timeoutMs) {
+      const job = await getRunJobById(jobId);
+      if (!job) break;
+
+      if (job.status === "COMPLETED") {
+        if (job.resultJson) {
+          try {
+            return NextResponse.json(JSON.parse(job.resultJson));
+          } catch {
+            return new NextResponse("Invalid run result payload", { status: 500 });
+          }
+        }
+        return new NextResponse("Run completed without result", { status: 500 });
+      }
+
+      if (job.status === "FAILED") {
+        return NextResponse.json({
+          ok: false,
+          status: "ERROR",
+          stdout: "",
+          stderr: job.lastError || "Run queue failed",
+          timeMs: 0
+        });
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+
+    return NextResponse.json({
+      ok: false,
+      status: "ERROR",
+      stdout: "",
+      stderr: "Run queued but timed out waiting for worker. Please try again.",
+      timeMs: 0
+    });
+
   } catch (error) {
     console.error("[RUN_POST]", error);
     return new NextResponse("Internal Error", { status: 500 });
