@@ -20,8 +20,15 @@ interface SubmitFormProps {
   initialRunInput?: string;
 }
 
+type UiTheme = "dark" | "light";
+
 function getDraftKey(problemId: string | null | undefined, language: SupportedLanguage) {
   return `submit-draft:${problemId || "no-problem"}:${language}`;
+}
+
+function getCurrentTheme(): UiTheme {
+  if (typeof document === "undefined") return "dark";
+  return document.documentElement.classList.contains("theme-light") ? "light" : "dark";
 }
 
 export default function SubmitForm({
@@ -53,6 +60,7 @@ export default function SubmitForm({
   const [runStderr, setRunStderr] = useState("");
   const [runTimeMs, setRunTimeMs] = useState<number | null>(null);
   const [saveHint, setSaveHint] = useState("");
+  const [uiTheme, setUiTheme] = useState<UiTheme>("dark");
 
   const loadDraft = useCallback(
     (targetLanguage: SupportedLanguage) => {
@@ -107,6 +115,17 @@ export default function SubmitForm({
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [saveDraft]);
+
+  useEffect(() => {
+    const syncTheme = () => setUiTheme(getCurrentTheme());
+    syncTheme();
+    window.addEventListener("themechange", syncTheme);
+    window.addEventListener("storage", syncTheme);
+    return () => {
+      window.removeEventListener("themechange", syncTheme);
+      window.removeEventListener("storage", syncTheme);
+    };
+  }, []);
 
   const handleSubmit = async () => {
     if (!problemId) {
@@ -277,16 +296,25 @@ export default function SubmitForm({
       {problemDesc && (
         <section className="p-6 bg-neutral-900 rounded-lg border border-neutral-700 shadow-sm">
           <h3 className="font-bold text-lg mb-2 text-neutral-100">문제 설명</h3>
-          <MarkdownMath className="prose prose-invert max-w-none text-neutral-100 text-sm leading-relaxed" content={problemDesc} />
+          <MarkdownMath
+            className={cn("prose max-w-none text-sm leading-relaxed", uiTheme === "dark" ? "prose-invert text-neutral-100" : "text-neutral-900")}
+            content={problemDesc}
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             <div>
               <h4 className="font-bold text-sm mb-1 text-neutral-200">입력</h4>
-              <MarkdownMath className="prose prose-invert max-w-none text-sm text-neutral-200 leading-relaxed" content={inputDesc} />
+              <MarkdownMath
+                className={cn("prose max-w-none text-sm leading-relaxed", uiTheme === "dark" ? "prose-invert text-neutral-200" : "text-neutral-700")}
+                content={inputDesc}
+              />
             </div>
             <div>
               <h4 className="font-bold text-sm mb-1 text-neutral-200">출력</h4>
-              <MarkdownMath className="prose prose-invert max-w-none text-sm text-neutral-200 leading-relaxed" content={outputDesc} />
+              <MarkdownMath
+                className={cn("prose max-w-none text-sm leading-relaxed", uiTheme === "dark" ? "prose-invert text-neutral-200" : "text-neutral-700")}
+                content={outputDesc}
+              />
             </div>
           </div>
         </section>
@@ -382,11 +410,11 @@ export default function SubmitForm({
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-[2fr_1fr] gap-4 min-h-0">
-        <div className="h-[62vh] rounded-lg border border-neutral-700 overflow-hidden shadow-sm bg-black">
+        <div className={cn("h-[62vh] rounded-lg border border-neutral-700 overflow-hidden shadow-sm", uiTheme === "dark" ? "bg-black" : "bg-white")}>
           <Editor
             height="100%"
             language={LANGUAGE_META[language].monaco}
-            theme="vs-dark"
+            theme={uiTheme === "dark" ? "vs-dark" : "vs"}
             value={code}
             onChange={(value) => setCode(value || "")}
             onMount={handleEditorMount}

@@ -85,6 +85,8 @@ interface UsacoContestClientProps {
   initialLogsByProblem: Record<string, LatestStatus[]>;
 }
 
+type UiTheme = "dark" | "light";
+
 const CONTEST_MS = 30 * 60 * 1000;
 
 const EXTENSION_TO_LANGUAGE: Record<string, SupportedLanguage> = {
@@ -124,6 +126,11 @@ function extensionOf(name: string) {
 function languageFromFilename(name: string): SupportedLanguage | null {
   const ext = extensionOf(name);
   return EXTENSION_TO_LANGUAGE[ext] || null;
+}
+
+function getCurrentTheme(): UiTheme {
+  if (typeof document === "undefined") return "dark";
+  return document.documentElement.classList.contains("theme-light") ? "light" : "dark";
 }
 
 function getDefaultStates(problems: ContestProblem[]): Record<string, PerProblemState> {
@@ -257,6 +264,7 @@ export default function UsacoContestClient({
   const [promotionDone, setPromotionDone] = useState(false);
   const [promotionStatus, setPromotionStatus] = useState<PromotionStatusResponse | null>(null);
   const [promotionDismissed, setPromotionDismissed] = useState(false);
+  const [uiTheme, setUiTheme] = useState<UiTheme>("dark");
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const storageKey = useMemo(() => `usaco-contest:${division}:${userId}`, [division, userId]);
@@ -275,6 +283,24 @@ export default function UsacoContestClient({
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify({ startAt, selectedId, states }));
   }, [storageKey, startAt, selectedId, states]);
+
+  useEffect(() => {
+    document.body.classList.add("usaco-contest-page-lock");
+    return () => {
+      document.body.classList.remove("usaco-contest-page-lock");
+    };
+  }, []);
+
+  useEffect(() => {
+    const syncTheme = () => setUiTheme(getCurrentTheme());
+    syncTheme();
+    window.addEventListener("themechange", syncTheme);
+    window.addEventListener("storage", syncTheme);
+    return () => {
+      window.removeEventListener("themechange", syncTheme);
+      window.removeEventListener("storage", syncTheme);
+    };
+  }, []);
 
   const loadPromotionStatus = async () => {
     try {
@@ -558,7 +584,7 @@ export default function UsacoContestClient({
   })();
 
   return (
-    <div className="usaco-contest-root">
+    <div className={`usaco-contest-root ${uiTheme === "light" ? "usaco-contest-theme-light" : ""}`}>
       {showPromotionModal && (
         <div className="usaco-promo-overlay">
           <div className="usaco-promo-confetti" aria-hidden>
@@ -635,15 +661,27 @@ export default function UsacoContestClient({
 
               <section>
                 <h3>Problem</h3>
-                <MarkdownMath className="prose prose-invert max-w-none text-neutral-100" statementMode content={selected.description} />
+                <MarkdownMath
+                  className={`prose max-w-none ${uiTheme === "dark" ? "prose-invert text-neutral-100" : "text-neutral-900"}`}
+                  statementMode
+                  content={selected.description}
+                />
               </section>
               <section>
                 <h3>Input</h3>
-                <MarkdownMath className="prose prose-invert max-w-none text-neutral-100" statementMode content={selected.inputDesc || "-"} />
+                <MarkdownMath
+                  className={`prose max-w-none ${uiTheme === "dark" ? "prose-invert text-neutral-100" : "text-neutral-900"}`}
+                  statementMode
+                  content={selected.inputDesc || "-"}
+                />
               </section>
               <section>
                 <h3>Output</h3>
-                <MarkdownMath className="prose prose-invert max-w-none text-neutral-100" statementMode content={selected.outputDesc || "-"} />
+                <MarkdownMath
+                  className={`prose max-w-none ${uiTheme === "dark" ? "prose-invert text-neutral-100" : "text-neutral-900"}`}
+                  statementMode
+                  content={selected.outputDesc || "-"}
+                />
               </section>
 
               <section>
@@ -742,7 +780,7 @@ export default function UsacoContestClient({
               <Editor
                 height="100%"
                 language={LANGUAGE_META[activeFile.language].monaco}
-                theme="vs-dark"
+                theme={uiTheme === "dark" ? "vs-dark" : "vs"}
                 value={activeFile.code}
                 onChange={(value) => updateActiveFileCode(value || "")}
                 options={{

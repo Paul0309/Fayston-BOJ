@@ -22,8 +22,31 @@ export default function RootLayout({
   const adsenseClient = process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_CLIENT;
 
   return (
-    <html lang="ko">
+    <html lang="ko" suppressHydrationWarning={true}>
       <body className={`${inter.className} bg-neutral-900`} suppressHydrationWarning={true}>
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                try {
+                  var saved = localStorage.getItem("schoolboj-theme");
+                  var root = document.documentElement;
+                  if (saved === "light") {
+                    root.classList.add("theme-light");
+                    root.classList.remove("theme-dark");
+                    root.setAttribute("data-theme", "light");
+                  } else {
+                    root.classList.add("theme-dark");
+                    root.classList.remove("theme-light");
+                    root.setAttribute("data-theme", "dark");
+                  }
+                } catch (_) {}
+              })();
+            `,
+          }}
+        />
         {adsenseClient ? (
           <Script
             id="adsbygoogle-init"

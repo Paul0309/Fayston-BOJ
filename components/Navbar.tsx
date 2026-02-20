@@ -6,6 +6,7 @@ import { Code2, Trophy, BarChart3, LogOut, User, ShieldPlus, ChevronDown, Swords
 import { cn } from "@/lib/utils";
 import { useSession, signOut } from "next-auth/react";
 import { getSessionUser } from "@/lib/session-user";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const PROBLEM_MENU: Array<{ title: string; items: Array<{ label: string; href: string }> }> = [
   {
@@ -113,6 +114,7 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           {session ? (
             <>
               <div className="text-sm font-medium text-neutral-100 flex items-center gap-2">

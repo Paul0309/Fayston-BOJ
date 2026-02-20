@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 export default function Home() {
   return (
     <div className="flex flex-col min-h-[calc(100vh-4rem)]">
-      <section className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-gradient-to-b from-neutral-900 to-neutral-950">
+      <section className="home-hero-section flex-1 flex flex-col items-center justify-center text-center p-8 bg-gradient-to-b from-neutral-900 to-neutral-950">
         <div className="max-w-3xl space-y-6">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-neutral-100">
             우리 학교만의 <br />
@@ -41,7 +41,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-20 bg-neutral-900 border-t border-neutral-800">
+      <section className="home-feature-section py-20 bg-neutral-900 border-t border-neutral-800">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-3 gap-8">
             <FeatureCard
@@ -68,7 +68,7 @@ export default function Home() {
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
   return (
-    <div className="p-6 rounded-2xl bg-neutral-800 border border-neutral-700">
+    <div className="home-feature-card p-6 rounded-2xl bg-neutral-800 border border-neutral-700">
       <div className="mb-4">{icon}</div>
       <h3 className="text-xl font-bold mb-2 text-neutral-100">{title}</h3>
       <p className="text-neutral-200 leading-relaxed">{description}</p>

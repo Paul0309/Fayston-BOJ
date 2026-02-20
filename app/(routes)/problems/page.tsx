@@ -151,7 +151,7 @@ export default async function TopProblemsPage(props: PageProps) {
                         {problems.map((problem) => {
                             const solved = Array.isArray(problem.submissions) && problem.submissions.length > 0;
                             return (
-                                <tr key={problem.id} className="hover:bg-neutral-800/70 transition-colors">
+                                <tr key={problem.id} className="problem-row hover:bg-neutral-800/70 transition-colors">
                                     <td className="px-6 py-4 font-mono text-neutral-300">{problem.number}</td>
                                     <td className="px-6 py-4">
                                         <Link href={`/problem/${problem.id}`} className="font-medium hover:text-blue-400 hover:underline">{problem.title}</Link>

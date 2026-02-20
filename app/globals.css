@@ -4,6 +4,17 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --usaco-nav-bg: #131313;
+  --usaco-nav-border: #2a2a2a;
+  --usaco-nav-link: #b8b8b8;
+  --usaco-nav-link-hover: #f1f1f1;
+  --usaco-page-bg: #0d0d0d;
+  --usaco-hero-base: #0d0d0d;
+  --usaco-hero-text: #efefef;
+  --usaco-hero-sub: #b8c0cf;
+  --usaco-surface: #151515;
+  --usaco-card-bg: #161616;
+  --usaco-card-border: #2a2a2a;
 }
 
 @theme inline {
@@ -26,15 +37,469 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+body,
+nav,
+footer,
+main,
+section,
+aside,
+article,
+input,
+select,
+textarea,
+button {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+html.theme-light body {
+  background: #f4f7fc;
+  color: #0f172a;
+  --usaco-nav-bg: #f8fafc;
+  --usaco-nav-border: #d7dee8;
+  --usaco-nav-link: #475569;
+  --usaco-nav-link-hover: #111827;
+  --usaco-page-bg: #f3f7fc;
+  --usaco-hero-base: #f4f8ff;
+  --usaco-hero-text: #0f172a;
+  --usaco-hero-sub: #334155;
+  --usaco-surface: #f8fbff;
+  --usaco-card-bg: #ffffff;
+  --usaco-card-border: #d7dee8;
+}
+
+html.theme-light .bg-neutral-950 {
+  background-color: #f3f4f6 !important;
+}
+
+html.theme-light .bg-neutral-900 {
+  background-color: #ffffff !important;
+}
+
+html.theme-light .bg-neutral-900\/95 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+html.theme-light .bg-neutral-900\/60 {
+  background-color: rgba(255, 255, 255, 0.6) !important;
+}
+
+html.theme-light .bg-neutral-950\/70 {
+  background-color: rgba(243, 244, 246, 0.7) !important;
+}
+
+html.theme-light .bg-neutral-800 {
+  background-color: #f3f4f6 !important;
+}
+
+html.theme-light .bg-neutral-700 {
+  background-color: #e5e7eb !important;
+}
+
+html.theme-light .border-neutral-900 {
+  border-color: #d1d5db !important;
+}
+
+html.theme-light .border-neutral-800 {
+  border-color: #d1d5db !important;
+}
+
+html.theme-light .border-neutral-700 {
+  border-color: #d1d5db !important;
+}
+
+html.theme-light .text-neutral-500 {
+  color: #475569 !important;
+}
+
+html.theme-light .text-neutral-400 {
+  color: #334155 !important;
+}
+
+html.theme-light .text-neutral-300 {
+  color: #1f2937 !important;
+}
+
+html.theme-light .text-neutral-200 {
+  color: #111827 !important;
+}
+
+html.theme-light .text-neutral-100 {
+  color: #0f172a !important;
+}
+
+html.theme-light .text-slate-500 {
+  color: #475569 !important;
+}
+
+html.theme-light .text-slate-400 {
+  color: #334155 !important;
+}
+
+html.theme-light .text-slate-300 {
+  color: #1f2937 !important;
+}
+
+html.theme-light .bg-blue-900\/40 {
+  background-color: #dbeafe !important;
+}
+
+html.theme-light .text-blue-300 {
+  color: #1d4ed8 !important;
+}
+
+html.theme-light .border-blue-500\/40 {
+  border-color: #93c5fd !important;
+}
+
+html.theme-light .bg-green-900\/40 {
+  background-color: #dcfce7 !important;
+}
+
+html.theme-light .text-green-300 {
+  color: #15803d !important;
+}
+
+html.theme-light .border-green-500\/40 {
+  border-color: #86efac !important;
+}
+
+html.theme-light .bg-red-900\/40 {
+  background-color: #fee2e2 !important;
+}
+
+html.theme-light .text-red-300 {
+  color: #b91c1c !important;
+}
+
+html.theme-light .border-red-500\/40 {
+  border-color: #fca5a5 !important;
+}
+
+html.theme-light .bg-amber-900\/40 {
+  background-color: #fef3c7 !important;
+}
+
+html.theme-light .text-amber-300 {
+  color: #b45309 !important;
+}
+
+html.theme-light .bg-orange-900\/40 {
+  background-color: #ffedd5 !important;
+}
+
+html.theme-light .text-orange-300 {
+  color: #c2410c !important;
+}
+
+html.theme-light .status-result-badge.status-accepted {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+}
+
+html.theme-light .status-result-badge.status-partial {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+}
+
+html.theme-light .status-result-badge.status-wa,
+html.theme-light .status-result-badge.status-error {
+  background: #fee2e2 !important;
+  color: #b91c1c !important;
+}
+
+html.theme-light .status-result-badge.status-pending {
+  background: #e5e7eb !important;
+  color: #334155 !important;
+}
+
+html.theme-light .prose-invert,
+html.theme-light .prose-invert :where(p, li, strong, em, h1, h2, h3, h4, code, blockquote) {
+  color: #0f172a !important;
+}
+
+html.theme-light .from-neutral-900 {
+  --tw-gradient-from: #f7f9fc var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(247 249 252 / 0) var(--tw-gradient-to-position) !important;
+}
+
+html.theme-light .to-neutral-950 {
+  --tw-gradient-to: #eff4fa var(--tw-gradient-to-position) !important;
+}
+
+html.theme-light .hover\:bg-neutral-800:hover {
+  background-color: #e5e7eb !important;
+}
+
+html.theme-light .hover\:bg-neutral-800\/70:hover {
+  background-color: rgba(229, 231, 235, 0.7) !important;
+}
+
+html.theme-light .hover\:bg-neutral-700:hover {
+  background-color: #dbe1ea !important;
+}
+
+html.theme-light .home-hero-section {
+  background-image:
+    radial-gradient(circle at 24% 24%, rgba(59, 130, 246, 0.09), transparent 32%),
+    radial-gradient(circle at 82% 12%, rgba(14, 165, 233, 0.1), transparent 30%),
+    linear-gradient(to bottom, #f8fbff, #eef4ff) !important;
+}
+
+html.theme-light .home-feature-section {
+  background: #f4f8ff !important;
+}
+
+html.theme-light .home-feature-card {
+  background: #ffffff !important;
+  border-color: #d6dee9 !important;
+}
+
+html.theme-light .problem-row:hover td {
+  background-color: #e8edf5 !important;
+}
+
+html.theme-light .usaco-subnav {
+  background: #f8fafc;
+  border-top-color: #d7dee8;
+  border-bottom-color: #d7dee8;
+}
+
+html.theme-light .usaco-sub-logo {
+  color: #2563eb;
+}
+
+html.theme-light .usaco-sub-links a {
+  color: #475569;
+}
+
+html.theme-light .usaco-sub-links a:hover {
+  color: #111827;
+}
+
+html.theme-light .usaco-home,
+html.theme-light .usaco-contest-root {
+  background: #f3f7fc;
+}
+
+html.theme-light .usaco-hero {
+  background:
+    radial-gradient(circle at 70% 40%, rgba(59, 130, 246, 0.16) 0%, transparent 55%),
+    radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.08) 0%, transparent 45%),
+    #f4f8ff;
+}
+
+html.theme-light .usaco-hero-title {
+  color: #0f172a;
+}
+
+html.theme-light .usaco-hero-desc {
+  color: #334155;
+}
+
+html.theme-light .usaco-division-strip,
+html.theme-light .usaco-archive,
+html.theme-light .usaco-rules {
+  background: #f8fbff;
+  border-color: #d7dee8;
+}
+
+html.theme-light .usaco-feature-grid article,
+html.theme-light .usaco-card,
+html.theme-light .usaco-past-chooser-card,
+html.theme-light .usaco-past-contest-block {
+  background: #ffffff;
+  border-color: #d7dee8;
+}
+
+html.theme-light .usaco-terminal {
+  background: #0f172a;
+  border-color: #1e293b;
+}
+
+html.theme-dark body {
+  background: #0b1424;
+  color: #dbe7ff;
+  --usaco-nav-bg: #0f1b2d;
+  --usaco-nav-border: #2a3f5f;
+  --usaco-nav-link: #b9cae3;
+  --usaco-nav-link-hover: #ecf3ff;
+  --usaco-page-bg: #0b1424;
+  --usaco-hero-base: #0b1424;
+  --usaco-hero-text: #ecf3ff;
+  --usaco-hero-sub: #b9cae3;
+  --usaco-surface: #0f1b2d;
+  --usaco-card-bg: #16243a;
+  --usaco-card-border: #2a3f5f;
+}
+
+html.theme-dark .bg-neutral-950 {
+  background-color: #0a1322 !important;
+}
+
+html.theme-dark .bg-neutral-900 {
+  background-color: #0f1b2d !important;
+}
+
+html.theme-dark .bg-neutral-900\/95 {
+  background-color: rgba(15, 27, 45, 0.95) !important;
+}
+
+html.theme-dark .bg-neutral-900\/60 {
+  background-color: rgba(15, 27, 45, 0.6) !important;
+}
+
+html.theme-dark .bg-neutral-800 {
+  background-color: #16243a !important;
+}
+
+html.theme-dark .bg-neutral-700 {
+  background-color: #21324b !important;
+}
+
+html.theme-dark .border-neutral-900,
+html.theme-dark .border-neutral-800,
+html.theme-dark .border-neutral-700 {
+  border-color: #2a3f5f !important;
+}
+
+html.theme-dark .text-neutral-500 {
+  color: #8fa3c1 !important;
+}
+
+html.theme-dark .text-neutral-400 {
+  color: #9db2d0 !important;
+}
+
+html.theme-dark .text-neutral-300 {
+  color: #b9cae3 !important;
+}
+
+html.theme-dark .text-neutral-200 {
+  color: #d2def2 !important;
+}
+
+html.theme-dark .text-neutral-100 {
+  color: #ecf3ff !important;
+}
+
+html.theme-dark .hover\:bg-neutral-800:hover {
+  background-color: #1d2f49 !important;
+}
+
+html.theme-dark .hover\:bg-neutral-700:hover {
+  background-color: #284063 !important;
+}
+
+html.theme-dark .home-hero-section {
+  background-image:
+    radial-gradient(circle at 18% 24%, rgba(59, 130, 246, 0.2), transparent 34%),
+    radial-gradient(circle at 82% 16%, rgba(56, 189, 248, 0.14), transparent 36%),
+    linear-gradient(145deg, #0b1424, #101f38) !important;
+}
+
+html.theme-dark .home-feature-section {
+  background: #0f1b2d !important;
+}
+
+/* USACO hardcoded colors: dark theme harmonization */
+html.theme-dark .usaco-subnav {
+  background: #0f1b2d;
+  border-top-color: #2a3f5f;
+  border-bottom-color: #2a3f5f;
+}
+
+html.theme-dark .usaco-sub-left,
+html.theme-dark .usaco-sub-links a,
+html.theme-dark .usaco-user-badge {
+  color: #b9cae3;
+}
+
+html.theme-dark .usaco-sub-links a:hover {
+  color: #ecf3ff;
+}
+
+html.theme-dark .usaco-home,
+html.theme-dark .usaco-contest-root {
+  background: #0b1424;
+}
+
+html.theme-dark .usaco-hero {
+  background:
+    radial-gradient(circle at 70% 40%, rgba(59, 130, 246, 0.22) 0%, transparent 55%),
+    radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.1) 0%, transparent 45%),
+    #0b1424;
+}
+
+html.theme-dark .usaco-hero-title {
+  color: #ecf3ff;
+}
+
+html.theme-dark .usaco-hero-desc {
+  color: #b9cae3;
+}
+
+html.theme-dark .usaco-division-strip,
+html.theme-dark .usaco-archive,
+html.theme-dark .usaco-rules {
+  background: #0f1b2d;
+  border-color: #2a3f5f;
+}
+
+html.theme-dark .usaco-feature-grid article,
+html.theme-dark .usaco-card,
+html.theme-dark .usaco-past-chooser-card,
+html.theme-dark .usaco-past-contest-block {
+  background: #16243a;
+  border-color: #2a3f5f;
+}
+
+html.theme-dark .usaco-page-head h1,
+html.theme-dark .usaco-archive h2,
+html.theme-dark .usaco-rules h2,
+html.theme-dark .usaco-feature-grid h3,
+html.theme-dark .usaco-past-division-head,
+html.theme-dark .usaco-past-problem-name,
+html.theme-dark .usaco-table th,
+html.theme-dark .usaco-table td {
+  color: #ecf3ff;
+}
+
+html.theme-dark .usaco-feature-grid p,
+html.theme-dark .usaco-archive p,
+html.theme-dark .usaco-rules li,
+html.theme-dark .usaco-page-head p,
+html.theme-dark .usaco-past-item span {
+  color: #b9cae3;
+}
+
+html.theme-dark .usaco-past-item,
+html.theme-dark .usaco-profile-stats div {
+  background: #16243a;
+  border-color: #2a3f5f;
+}
+
+html.theme-dark .usaco-terminal,
+html.theme-dark .usaco-io-box,
+html.theme-dark .usaco-editor-empty-card,
+html.theme-dark .usaco-output-wrap,
+html.theme-dark .usaco-run-input-wrap,
+html.theme-dark .usaco-action-bar {
+  border-color: #2a3f5f;
+}
+
+html.theme-dark .usaco-terminal {
+  background: #0b1424;
+}
+
 .boj-code-font {
   font-family: Consolas, "Liberation Mono", Menlo, Monaco, "Courier New", monospace;
 }
 
 .usaco-subnav {
   height: 44px;
-  border-top: 1px solid #1f1f1f;
-  border-bottom: 1px solid #2a2a2a;
-  background: #131313;
+  border-top: 1px solid var(--usaco-nav-border);
+  border-bottom: 1px solid var(--usaco-nav-border);
+  background: var(--usaco-nav-bg);
 }
 
 .usaco-subnav-inner {
@@ -62,13 +527,13 @@ body {
 }
 
 .usaco-sub-links a {
-  color: #b8b8b8;
+  color: var(--usaco-nav-link);
   text-decoration: none;
   font-size: 13px;
 }
 
 .usaco-sub-links a:hover {
-  color: #f1f1f1;
+  color: var(--usaco-nav-link-hover);
 }
 
 .usaco-sub-right {
@@ -89,7 +554,7 @@ body {
 }
 
 .usaco-home {
-  background: #0d0d0d;
+  background: var(--usaco-page-bg);
   min-height: calc(100vh - 108px);
 }
 
@@ -105,7 +570,7 @@ body {
   background:
     radial-gradient(circle at 70% 40%, rgba(59, 130, 246, 0.15) 0%, transparent 55%),
     radial-gradient(circle at 20% 80%, rgba(34, 197, 94, 0.06) 0%, transparent 45%),
-    #0d0d0d;
+    var(--usaco-hero-base);
 }
 
 .usaco-hero-badge {
@@ -128,7 +593,7 @@ body {
   letter-spacing: -0.04em;
   font-size: clamp(2.6rem, 4.5vw, 4rem);
   font-weight: 900;
-  color: #efefef;
+  color: var(--usaco-hero-text);
 }
 
 .usaco-hero-title span {
@@ -138,7 +603,7 @@ body {
 .usaco-hero-desc {
   margin: 0 0 2rem;
   max-width: 420px;
-  color: #b8c0cf;
+  color: var(--usaco-hero-sub);
   font-size: 1.05rem;
   line-height: 1.7;
 }
@@ -211,7 +676,7 @@ body {
   border-top: 1px solid #2a2a2a;
   border-bottom: 1px solid #2a2a2a;
   padding: 2.5rem 8%;
-  background: #151515;
+  background: var(--usaco-surface);
 }
 
 .usaco-division-strip h2 {
@@ -294,8 +759,8 @@ body {
 }
 
 .usaco-feature-grid article {
-  background: #161616;
-  border: 1px solid #2a2a2a;
+  background: var(--usaco-card-bg);
+  border: 1px solid var(--usaco-card-border);
   border-radius: 12px;
   padding: 1.5rem;
 }
@@ -314,7 +779,7 @@ body {
 }
 
 .usaco-archive {
-  background: #151515;
+  background: var(--usaco-surface);
   border-top: 1px solid #2a2a2a;
   padding: 3rem 8%;
 }
@@ -345,7 +810,7 @@ body {
 }
 
 .usaco-rules {
-  background: #0f0f0f;
+  background: var(--usaco-surface);
   border-top: 1px solid #2a2a2a;
   padding: 3rem 8%;
 }
@@ -377,18 +842,27 @@ body {
 
 .usaco-contest-root {
   height: calc(100vh - 108px);
+  height: calc(100dvh - 108px);
+  min-height: calc(100vh - 108px);
+  min-height: calc(100dvh - 108px);
   overflow: hidden;
-  background: #111;
+  background: var(--usaco-page-bg);
   padding: 0;
 }
 
 .usaco-contest-main {
   height: 100%;
+  min-height: 100%;
   display: grid;
   grid-template-columns: 310px minmax(0, 1fr);
   max-width: none;
   margin: 0 auto;
   border-top: 1px solid #2a2a2a;
+  overflow: hidden;
+  min-height: 0;
+}
+
+body.usaco-contest-page-lock {
   overflow: hidden;
 }
 
@@ -440,6 +914,7 @@ body {
 }
 
 .usaco-problem-scroll {
+  flex: 1 1 auto;
   overflow: auto;
   min-height: 0;
   padding: 1rem 1.1rem;
@@ -845,6 +1320,287 @@ body {
   border-color: #7a2626;
 }
 
+/* USACO contest IDE scoped themes */
+.usaco-contest-root.usaco-contest-theme-dark {
+  background: #0b0f16;
+}
+
+.usaco-contest-root.usaco-contest-theme-dark .usaco-contest-main,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-contest-sidebar,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-editor-pane,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-output-wrap {
+  border-color: #263142;
+}
+
+.usaco-contest-root.usaco-contest-theme-dark .usaco-contest-sidebar {
+  background: #111722;
+}
+
+.usaco-contest-root.usaco-contest-theme-dark .usaco-q-tabs,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-editor-top,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-run-input-head,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-output-head,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-action-bar,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-io-head {
+  background: #141d2a;
+  border-color: #263142;
+}
+
+.usaco-contest-root.usaco-contest-theme-dark .usaco-problem-title,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-problem-scroll h3,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-scoring-list,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-io-box pre,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-file-tab.active,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-editor-empty h4 {
+  color: #e7eefb;
+}
+
+.usaco-contest-root.usaco-contest-theme-dark .usaco-problem-scroll p,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-problem-meta,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-submission-log-item,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-editor-empty p,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-score-mini {
+  color: #aab8cd;
+}
+
+.usaco-contest-root.usaco-contest-theme-dark .usaco-io-box,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-editor-empty-card,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-file-create-input,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-new-file-btn,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-lang-select,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-run-btn,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-submit-btn,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-reset-btn {
+  border-color: #334357;
+}
+
+.usaco-contest-root.usaco-contest-theme-dark .usaco-io-box pre,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-run-input,
+.usaco-contest-root.usaco-contest-theme-dark .usaco-output-body {
+  background: #0d131d;
+}
+
+.usaco-contest-root.usaco-contest-theme-dark .usaco-editor-empty-card {
+  background: #111a28;
+}
+
+.usaco-contest-root.usaco-contest-theme-light {
+  background: #eef3fb;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-contest-sidebar {
+  background: #f8fbff;
+  border-color: #d5ddea;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-q-tabs,
+.usaco-contest-root.usaco-contest-theme-light .usaco-editor-top,
+.usaco-contest-root.usaco-contest-theme-light .usaco-run-input-head,
+.usaco-contest-root.usaco-contest-theme-light .usaco-output-head,
+.usaco-contest-root.usaco-contest-theme-light .usaco-action-bar,
+.usaco-contest-root.usaco-contest-theme-light .usaco-io-head {
+  background: #f1f5fb;
+  border-color: #d5ddea;
+  color: #5b6b83;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-q-tab {
+  color: #4f6078;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-q-tab.active {
+  color: #2563eb;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-problem-title,
+.usaco-contest-root.usaco-contest-theme-light .usaco-problem-scroll h3,
+.usaco-contest-root.usaco-contest-theme-light .usaco-file-tab.active,
+.usaco-contest-root.usaco-contest-theme-light .usaco-editor-empty h4,
+.usaco-contest-root.usaco-contest-theme-light .usaco-score-mini {
+  color: #0f172a;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-problem-meta,
+.usaco-contest-root.usaco-contest-theme-light .usaco-problem-scroll p,
+.usaco-contest-root.usaco-contest-theme-light .usaco-scoring-list,
+.usaco-contest-root.usaco-contest-theme-light .usaco-submission-log-item,
+.usaco-contest-root.usaco-contest-theme-light .usaco-editor-empty p {
+  color: #334155;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-tag-pill {
+  color: #1d4ed8;
+  border-color: #93c5fd;
+  background: #dbeafe;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-io-box,
+.usaco-contest-root.usaco-contest-theme-light .usaco-editor-empty-card,
+.usaco-contest-root.usaco-contest-theme-light .usaco-new-file-btn,
+.usaco-contest-root.usaco-contest-theme-light .usaco-file-create-input,
+.usaco-contest-root.usaco-contest-theme-light .usaco-lang-select,
+.usaco-contest-root.usaco-contest-theme-light .usaco-run-btn,
+.usaco-contest-root.usaco-contest-theme-light .usaco-submit-btn,
+.usaco-contest-root.usaco-contest-theme-light .usaco-reset-btn {
+  border-color: #cdd7e6;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-file-tab,
+.usaco-contest-root.usaco-contest-theme-light .usaco-new-file-btn,
+.usaco-contest-root.usaco-contest-theme-light .usaco-lang-select,
+.usaco-contest-root.usaco-contest-theme-light .usaco-reset-btn {
+  color: #1e293b;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-editor-pane {
+  background: #f4f8ff;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-editor-wrap {
+  background: #f7faff;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-new-file-btn {
+  background: #f8fbff;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-io-box pre,
+.usaco-contest-root.usaco-contest-theme-light .usaco-run-input,
+.usaco-contest-root.usaco-contest-theme-light .usaco-output-body,
+.usaco-contest-root.usaco-contest-theme-light .usaco-editor-empty-card {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-run-input-wrap,
+.usaco-contest-root.usaco-contest-theme-light .usaco-output-wrap {
+  background: #ffffff;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-copy-btn {
+  background: #f1f5fb;
+  border-color: #cdd7e6;
+  color: #1e293b;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-copy-btn:hover {
+  background: #e7eef9;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-lang-select {
+  background: #ffffff;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-lang-select:disabled {
+  background: #eef3f9;
+  color: #64748b;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-run-btn {
+  background: #ecfdf3;
+  border-color: #8ddcb2;
+  color: #166534;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-run-btn:hover:not(:disabled) {
+  background: #dcfce7;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-submit-btn {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-submit-btn:hover:not(:disabled) {
+  background: #1d4ed8;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-score-mini {
+  color: #334155;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-timer {
+  color: #166534;
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-timer.danger {
+  color: #b91c1c;
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-output-wrap,
+.usaco-contest-root.usaco-contest-theme-light .usaco-run-input-wrap {
+  border-color: #d5ddea !important;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-output-wrap,
+.usaco-contest-root.usaco-contest-theme-light .usaco-run-input-wrap,
+.usaco-contest-root.usaco-contest-theme-light .usaco-action-bar,
+.usaco-contest-root.usaco-contest-theme-light .usaco-editor-top,
+.usaco-contest-root.usaco-contest-theme-light .usaco-contest-main {
+  border-color: #d5ddea;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-problem-scroll::-webkit-scrollbar-thumb {
+  background: #c7d3e4;
+}
+
+.usaco-contest-root.usaco-contest-theme-light .usaco-problem-scroll::-webkit-scrollbar-track {
+  background: #eef3fb;
+}
+
+/* Keep contest dark as original default look */
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) {
+  background: #111;
+}
+
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-contest-main {
+  border-top-color: #2a2a2a;
+}
+
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-contest-sidebar {
+  background: #141414;
+  border-right-color: #2a2a2a;
+}
+
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-q-tabs,
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-editor-top,
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-run-input-head,
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-output-head,
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-action-bar,
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-io-head {
+  background: #1a1a1a;
+  border-color: #2a2a2a;
+}
+
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-editor-pane {
+  background: #111;
+}
+
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-run-input,
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-output-body,
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-io-box pre {
+  background: #101010;
+}
+
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-editor-empty-card {
+  background: #151515;
+  border-color: #2e2e2e;
+}
+
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-new-file-btn,
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-file-create-input,
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-lang-select,
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-run-btn,
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-submit-btn,
+html.theme-dark .usaco-contest-root:not(.usaco-contest-theme-light) .usaco-reset-btn {
+  border-color: #2f2f2f;
+}
+
 .usaco-page-wrap {
   max-width: 1200px;
   margin: 0 auto;
@@ -1061,6 +1817,12 @@ body {
   border-radius: 999px;
   padding: 2px 8px;
   font-weight: 700;
+}
+
+html.theme-light .usaco-main-division {
+  color: #1d4ed8;
+  background: #dbeafe;
+  border-color: #93c5fd;
 }
 
 .usaco-subnav-inner {

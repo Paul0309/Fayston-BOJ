@@ -224,16 +224,16 @@ export default async function StatusPage(props: PageProps) {
                   <td className="px-4 py-3">
                     <span
                       className={cn(
-                        "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium",
+                        "status-result-badge inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium",
                         sub.status === "ACCEPTED"
-                          ? "bg-green-900/40 text-green-300"
+                          ? "status-accepted bg-green-900/40 text-green-300"
                           : sub.status === "PARTIAL"
-                            ? "bg-amber-900/40 text-amber-300"
+                            ? "status-partial bg-amber-900/40 text-amber-300"
                             : sub.status === "WRONG_ANSWER"
-                              ? "bg-red-900/40 text-red-300"
+                              ? "status-wa bg-red-900/40 text-red-300"
                               : sub.status === "PENDING"
-                                ? "bg-neutral-800 text-neutral-200"
-                                : "bg-orange-900/40 text-orange-300"
+                                ? "status-pending bg-neutral-800 text-neutral-200"
+                                : "status-error bg-orange-900/40 text-orange-300"
                       )}
                     >
                       {sub.status === "ACCEPTED" && <CheckCircle2 className="w-3 h-3" />}
