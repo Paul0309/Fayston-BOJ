@@ -65,6 +65,16 @@ type PromotionResponse = {
   message: string;
 };
 
+type PromotionStatusResponse = {
+  ok: boolean;
+  currentDivision: string;
+  nextDivision: string | null;
+  eligible: boolean;
+  canPromote: boolean;
+  deadlinePassed: boolean;
+  message: string;
+};
+
 interface UsacoContestClientProps {
   division: string;
   userId: string;
@@ -243,6 +253,8 @@ export default function UsacoContestClient({
   const [promotionBusy, setPromotionBusy] = useState(false);
   const [promotionMessage, setPromotionMessage] = useState("");
   const [promotionDone, setPromotionDone] = useState(false);
+  const [promotionStatus, setPromotionStatus] = useState<PromotionStatusResponse | null>(null);
+  const [promotionDismissed, setPromotionDismissed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const storageKey = useMemo(() => `usaco-contest:${division}:${userId}`, [division, userId]);
@@ -256,29 +268,35 @@ export default function UsacoContestClient({
   const selectedLogs = selected ? logsByProblem[selected.id] || [] : [];
   const isEnded = remainingMs <= 0;
   const isJudgePending = selectedLatest?.status === "PENDING";
-  const allSolvedPerfect =
-    problems.length > 0 &&
-    problems.every((p) => {
-      const row = statuses[p.id];
-      if (!row || row.status !== "ACCEPTED") return false;
-      if (typeof row.totalScore !== "number" || typeof row.maxScore !== "number") return false;
-      if (row.maxScore <= 0) return false;
-      return row.totalScore >= row.maxScore;
-    });
+  const canPromoteNow = !!promotionStatus?.eligible && !!promotionStatus?.canPromote;
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify({ startAt, selectedId, states }));
   }, [storageKey, startAt, selectedId, states]);
 
-  useEffect(() => {
-    if (!allSolvedPerfect) return;
-    const key = `usaco-promo-seen:${division}:${userId}`;
-    const seen = localStorage.getItem(key);
-    if (!seen) {
-      setShowPromotionModal(true);
-      localStorage.setItem(key, "1");
+  const loadPromotionStatus = async () => {
+    try {
+      const res = await fetch("/api/usaco/contest/promotion", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = (await res.json()) as PromotionStatusResponse;
+      setPromotionStatus(data);
+    } catch {
+      // ignore
     }
-  }, [allSolvedPerfect, division, userId]);
+  };
+
+  useEffect(() => {
+    void loadPromotionStatus();
+  }, []);
+
+  useEffect(() => {
+    if (canPromoteNow && !promotionDismissed && !promotionDone) {
+      setShowPromotionModal(true);
+    }
+    if (!canPromoteNow) {
+      setPromotionDismissed(false);
+    }
+  }, [canPromoteNow, promotionDismissed, promotionDone]);
 
   useEffect(() => {
     setFileCreatorOpen(false);
@@ -472,6 +490,7 @@ export default function UsacoContestClient({
         return;
       }
       await refreshProgress();
+      await loadPromotionStatus();
     } catch {
       alert("Submit failed.");
     } finally {
@@ -491,6 +510,7 @@ export default function UsacoContestClient({
       const data = (await res.json()) as PromotionResponse;
       setPromotionMessage(data.message || (data.promoted ? "승급되었습니다." : "승급 조건을 확인하세요."));
       setPromotionDone(!!data.promoted);
+      await loadPromotionStatus();
     } catch (error) {
       setPromotionMessage(error instanceof Error ? error.message : "Promotion failed.");
     } finally {
@@ -551,7 +571,14 @@ export default function UsacoContestClient({
                   다음 디비전으로 이동
                 </button>
               )}
-              <button type="button" className="secondary" onClick={() => setShowPromotionModal(false)}>
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  setShowPromotionModal(false);
+                  setPromotionDismissed(true);
+                }}
+              >
                 닫기
               </button>
             </div>
@@ -802,6 +829,18 @@ export default function UsacoContestClient({
             <button type="button" className="usaco-submit-btn" onClick={handleSubmit} disabled={!activeFile || submitBusy || runBusy || isEnded}>
               {submitBusy ? "Submitting..." : "Submit"}
             </button>
+
+            {canPromoteNow && !promotionDone ? (
+              <button
+                type="button"
+                className="usaco-submit-btn"
+                onClick={() => setShowPromotionModal(true)}
+                disabled={promotionBusy}
+                title="모든 문제 만점 완료: 디비전 승급 가능"
+              >
+                프로모션 받기
+              </button>
+            ) : null}
 
             <div className="usaco-action-spacer" />
             <div className="usaco-score-mini">

@@ -2,6 +2,11 @@ import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { withDbRetry } from "@/lib/db-retry";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { getSessionUser } from "@/lib/session-user";
+import { checkUserUsacoPromotionEligibility } from "@/lib/usaco/promotion";
+import UsacoPromotionButton from "@/components/UsacoPromotionButton";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -75,6 +80,8 @@ function levelClass(count: number, maxCount: number, inYear: boolean) {
 
 export default async function UserProfilePage(props: PageProps) {
   const { id } = await props.params;
+  const session = await getServerSession(authOptions);
+  const viewerId = getSessionUser(session).id;
   const currentYear = new Date().getFullYear();
   const yearStart = new Date(Date.UTC(currentYear, 0, 1));
   const nextYearStart = new Date(Date.UTC(currentYear + 1, 0, 1));
@@ -86,6 +93,8 @@ export default async function UserProfilePage(props: PageProps) {
     })
   );
   if (!user) return notFound();
+  const isMe = !!viewerId && viewerId === user.id;
+  const promotionInfo = isMe ? await checkUserUsacoPromotionEligibility(user.id) : null;
 
   const [
     totalSubmissions,
@@ -259,6 +268,9 @@ export default async function UserProfilePage(props: PageProps) {
           <h1 className="text-2xl font-bold">{user.name || "Unknown User"}</h1>
           <div className="text-sm text-neutral-300 mt-1">{user.email}</div>
           <div className="text-sm text-neutral-300 mt-1">Division: {user.division || "Bronze"}</div>
+          {isMe && promotionInfo ? (
+            <UsacoPromotionButton eligible={promotionInfo.eligible} canPromote={promotionInfo.canPromote} message={promotionInfo.message} />
+          ) : null}
           <div className="text-xs text-neutral-300 mt-1">가입일: {new Date(user.createdAt).toLocaleDateString()}</div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-5 divide-y md:divide-y-0 md:divide-x divide-neutral-700">
