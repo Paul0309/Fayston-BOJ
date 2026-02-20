@@ -130,6 +130,26 @@ model JudgeQueue {
   finishedAt   DateTime?
 }
 
+model RunQueue {
+  id         String   @id @default(uuid())
+  userId     String?
+  problemId  String
+  language   String
+  code       String
+  input      String   @default("")
+  timeLimitMs Int     @default(2000)
+  status     String   @default("PENDING") // PENDING, RUNNING, COMPLETED, FAILED
+  attempts   Int      @default(0)
+  resultJson String?
+  lastError  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  startedAt  DateTime?
+  finishedAt DateTime?
+
+  @@index([status, createdAt])
+}
+
 model ProblemEditorial {
   id         String   @id @default(uuid())
   problemId  String
