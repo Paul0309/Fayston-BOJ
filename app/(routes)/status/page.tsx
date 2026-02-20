@@ -205,7 +205,7 @@ export default async function StatusPage(props: PageProps) {
               });
 
               return (
-                <tr key={sub.id} className="hover:bg-neutral-800/70 transition-colors">
+                <tr key={sub.id} className="interactive-row hover:bg-neutral-800/70 transition-colors">
                   <td className="px-4 py-3 font-mono text-neutral-300 text-xs">
                     <Link href={`/status/${sub.id}`} className="hover:underline hover:text-blue-400">
                       {sub.id.substring(0, 8)}

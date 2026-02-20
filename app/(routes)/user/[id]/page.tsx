@@ -1,21 +1,27 @@
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { withDbRetry } from "@/lib/db-retry";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getSessionUser } from "@/lib/session-user";
 import { checkUserUsacoPromotionEligibility } from "@/lib/usaco/promotion";
 import UsacoPromotionButton from "@/components/UsacoPromotionButton";
+import LazyRecentSubmissionList from "@/components/profile/LazyRecentSubmissionList";
+import LazySolvedProblemList from "@/components/profile/LazySolvedProblemList";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ solvedPage?: string }>;
 }
 
 type LanguageStat = { language: string; total: number; accepted: number };
 type DifficultyStat = { difficulty: string; solved: number };
 type DailyActivityRow = { day: string; count: number };
 type HeatmapCell = { key: string; count: number; inYear: boolean };
+type SolvedProblemRow = { problemId: string; number: number; solvedAt: Date };
+
+const RECENT_SUBMISSION_SIZE = 20;
+const SOLVED_PAGE_SIZE = 60;
 
 export const dynamic = "force-dynamic";
 
@@ -80,6 +86,10 @@ function levelClass(count: number, maxCount: number, inYear: boolean) {
 
 export default async function UserProfilePage(props: PageProps) {
   const { id } = await props.params;
+  const searchParams = await props.searchParams;
+  const solvedPageInput = Number(searchParams.solvedPage || "1");
+  const solvedPage = Number.isNaN(solvedPageInput) ? 1 : Math.max(1, solvedPageInput);
+  const solvedOffset = (solvedPage - 1) * SOLVED_PAGE_SIZE;
   const session = await getServerSession(authOptions);
   const viewerId = getSessionUser(session).id;
   const currentYear = new Date().getFullYear();
@@ -94,20 +104,22 @@ export default async function UserProfilePage(props: PageProps) {
   );
   if (!user) return notFound();
   const isMe = !!viewerId && viewerId === user.id;
-  const promotionInfo = isMe ? await checkUserUsacoPromotionEligibility(user.id) : null;
+  const promotionPromise = isMe ? checkUserUsacoPromotionEligibility(user.id) : Promise.resolve(null);
 
   const [
+    promotionInfo,
     totalSubmissions,
     acceptedSubmissions,
     publicSubmissions,
     recentSubmissions,
-    acceptedHistory,
+    solvedRows,
     languageStatsRaw,
     difficultyStatsRaw,
     activityRows,
     yearAcceptedRows,
     tagStatsRaw
   ] = await Promise.all([
+    promotionPromise,
     withDbRetry(() => db.submission.count({ where: { userId: id, NOT: { detail: { contains: '"hiddenInStatus":true' } } } })),
     withDbRetry(() =>
       db.submission.count({ where: { userId: id, status: "ACCEPTED", NOT: { detail: { contains: '"hiddenInStatus":true' } } } })
@@ -125,25 +137,29 @@ export default async function UserProfilePage(props: PageProps) {
       db.submission.findMany({
         where: { userId: id, NOT: { detail: { contains: '"hiddenInStatus":true' } } },
         orderBy: { createdAt: "desc" },
-        take: 20,
+        take: RECENT_SUBMISSION_SIZE,
         select: {
           id: true,
-          status: true,
-          language: true,
           createdAt: true,
-          totalScore: true,
-          maxScore: true,
-          problem: { select: { id: true, number: true, title: true } }
+          problem: { select: { id: true, number: true } }
         }
       })
     ),
-    withDbRetry(() =>
-      db.submission.findMany({
-        where: { userId: id, status: "ACCEPTED", NOT: { detail: { contains: '"hiddenInStatus":true' } } },
-        orderBy: { createdAt: "desc" },
-        select: { problemId: true, createdAt: true }
-      })
-    ),
+    withDbRetry(() => db.$queryRaw<SolvedProblemRow[]>`
+      SELECT
+        p."id" AS "problemId",
+        p."number" AS "number",
+        MAX(s."createdAt") AS "solvedAt"
+      FROM "Submission" s
+      JOIN "Problem" p ON p."id" = s."problemId"
+      WHERE s."userId" = ${id}
+        AND s."status" = 'ACCEPTED'
+        AND (s."detail" IS NULL OR s."detail" NOT LIKE '%"hiddenInStatus":true%')
+      GROUP BY p."id", p."number"
+      ORDER BY MAX(s."createdAt") DESC
+      LIMIT ${SOLVED_PAGE_SIZE}
+      OFFSET ${solvedOffset}
+    `),
     withDbRetry(() => db.$queryRaw<Array<{ language: string; total: bigint | number; accepted: bigint | number }>>`
       SELECT
         "language",
@@ -247,17 +263,17 @@ export default async function UserProfilePage(props: PageProps) {
     else break;
   }
 
-  const solvedMap = new Map<string, Date>();
-  for (const row of acceptedHistory) {
-    if (!solvedMap.has(row.problemId)) solvedMap.set(row.problemId, row.createdAt);
-  }
-  const solvedIds = [...solvedMap.keys()];
-  const solvedProblems = solvedIds.length
-    ? await withDbRetry(() =>
-        db.problem.findMany({ where: { id: { in: solvedIds } }, select: { id: true, number: true, title: true, difficulty: true } })
-      )
-    : [];
-  const solvedById = new Map(solvedProblems.map((p) => [p.id, p]));
+  const recentSubmissionItems = recentSubmissions.map((sub) => ({
+    submissionId: sub.id,
+    problemId: sub.problem.id,
+    problemNumber: sub.problem.number,
+    submittedAt: sub.createdAt.toISOString()
+  }));
+  const solvedProblemItems = solvedRows.map((row) => ({
+    problemId: row.problemId,
+    problemNumber: row.number,
+    solvedAt: new Date(row.solvedAt).toISOString()
+  }));
 
   const heatmap = buildYearHeatmap(currentYear, yearAcceptedMap);
 
@@ -407,86 +423,12 @@ export default async function UserProfilePage(props: PageProps) {
 
       <section className="rounded-md border border-neutral-700 bg-neutral-900 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-neutral-700 font-semibold">최근 제출</div>
-        <table className="w-full text-sm">
-          <thead className="bg-neutral-800 text-neutral-200">
-            <tr>
-              <th className="px-4 py-3 text-left">문제</th>
-              <th className="px-4 py-3 text-left">결과</th>
-              <th className="px-4 py-3 text-left">점수</th>
-              <th className="px-4 py-3 text-left">언어</th>
-              <th className="px-4 py-3 text-left">제출 시각</th>
-            </tr>
-          </thead>
-          <tbody>
-            {recentSubmissions.map((sub) => (
-              <tr key={sub.id} className="border-t border-neutral-700">
-                <td className="px-4 py-3">
-                  <Link href={`/problem/${sub.problem.id}`} className="hover:underline hover:text-blue-400">
-                    {sub.problem.number} - {sub.problem.title}
-                  </Link>
-                </td>
-                <td className="px-4 py-3">
-                  <Link href={`/status/${sub.id}`} className="hover:underline hover:text-blue-400">
-                    {sub.status}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 font-mono text-xs">
-                  {typeof sub.totalScore === "number" && typeof sub.maxScore === "number"
-                    ? `${sub.totalScore} / ${sub.maxScore}`
-                    : "-"}
-                </td>
-                <td className="px-4 py-3 uppercase font-mono text-xs">{sub.language}</td>
-                <td className="px-4 py-3 text-xs text-neutral-300">{new Date(sub.createdAt).toLocaleString()}</td>
-              </tr>
-            ))}
-            {recentSubmissions.length === 0 && (
-              <tr>
-                <td className="px-4 py-6 text-center text-neutral-300" colSpan={5}>
-                  아직 제출 내역이 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <LazyRecentSubmissionList items={recentSubmissionItems} />
       </section>
 
       <section className="rounded-md border border-neutral-700 bg-neutral-900 shadow-sm overflow-hidden">
         <div className="px-6 py-4 border-b border-neutral-700 font-semibold">해결한 문제</div>
-        <table className="w-full text-sm">
-          <thead className="bg-neutral-800 text-neutral-200">
-            <tr>
-              <th className="px-4 py-3 text-left">번호</th>
-              <th className="px-4 py-3 text-left">제목</th>
-              <th className="px-4 py-3 text-left">난이도</th>
-              <th className="px-4 py-3 text-left">해결 시각</th>
-            </tr>
-          </thead>
-          <tbody>
-            {solvedIds.map((problemId) => {
-              const problem = solvedById.get(problemId);
-              if (!problem) return null;
-              return (
-                <tr key={problemId} className="border-t border-neutral-700">
-                  <td className="px-4 py-3 font-mono">{problem.number}</td>
-                  <td className="px-4 py-3">
-                    <Link href={`/problem/${problem.id}`} className="hover:underline hover:text-blue-400">
-                      {problem.title}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3">{problem.difficulty}</td>
-                  <td className="px-4 py-3 text-xs text-neutral-300">{solvedMap.get(problemId)?.toLocaleString()}</td>
-                </tr>
-              );
-            })}
-            {solvedIds.length === 0 && (
-              <tr>
-                <td className="px-4 py-6 text-center text-neutral-300" colSpan={4}>
-                  아직 해결한 문제가 없습니다.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <LazySolvedProblemList items={solvedProblemItems} />
       </section>
     </div>
   );

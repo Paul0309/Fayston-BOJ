@@ -38,6 +38,8 @@ const PROBLEM_MENU: Array<{ title: string; items: Array<{ label: string; href: s
   }
 ];
 
+const NAV_LINK_CLASS = "interactive-link hover:text-blue-400 transition-colors flex items-center gap-1";
+
 export default function Navbar() {
   const { data: session } = useSession();
   const pathname = usePathname();
@@ -55,7 +57,7 @@ export default function Navbar() {
 
         <div className="hidden md:flex items-center gap-6 text-sm font-medium text-neutral-200">
           <div className="relative group">
-            <Link href="/problems" className="hover:text-blue-400 transition-colors flex items-center gap-1 py-5">
+            <Link href="/problems" className={`${NAV_LINK_CLASS} py-5`}>
               <Code2 className="w-4 h-4" />
               문제 <ChevronDown className="w-4 h-4 opacity-80" />
             </Link>
@@ -69,7 +71,7 @@ export default function Navbar() {
                         <Link
                           key={item.label}
                           href={item.href}
-                          className="block rounded px-2 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800 hover:text-blue-300 transition-colors"
+                          className="interactive-menu-link block rounded px-2 py-1.5 text-sm text-neutral-200 hover:bg-neutral-800 hover:text-blue-300 transition-colors"
                         >
                           {item.label}
                         </Link>
@@ -81,32 +83,32 @@ export default function Navbar() {
             </div>
           </div>
 
-          <Link href="/status" className="hover:text-blue-400 transition-colors flex items-center gap-1">
+          <Link href="/status" className={NAV_LINK_CLASS}>
             <BarChart3 className="w-4 h-4" />
             채점 현황
           </Link>
-          <Link href="/rank" className="hover:text-blue-400 transition-colors flex items-center gap-1">
+          <Link href="/rank" className={NAV_LINK_CLASS}>
             <Trophy className="w-4 h-4" />
             랭킹
           </Link>
-          <Link href="/arena" className="hover:text-blue-400 transition-colors flex items-center gap-1">
+          <Link href="/arena" className={NAV_LINK_CLASS}>
             <Swords className="w-4 h-4" />
             1v1 Arena
           </Link>
-          <Link href="/usaco" className="hover:text-blue-400 transition-colors flex items-center gap-1">
+          <Link href="/usaco" className={NAV_LINK_CLASS}>
             <Code2 className="w-4 h-4" />
             USACO
           </Link>
 
           {session ? (
-            <Link href="/profile" className="hover:text-blue-400 transition-colors flex items-center gap-1">
+            <Link href="/profile" className={NAV_LINK_CLASS}>
               <User className="w-4 h-4" />
               프로필
             </Link>
           ) : null}
 
           {role === "ADMIN" ? (
-            <Link href="/admin" className="hover:text-blue-400 transition-colors flex items-center gap-1">
+            <Link href="/admin" className={NAV_LINK_CLASS}>
               <ShieldPlus className="w-4 h-4" />
               관리자
             </Link>
@@ -122,16 +124,16 @@ export default function Navbar() {
                 {session.user?.name || "User"}
                 {isUsacoContest ? <span className="usaco-main-division">{division || "Bronze"}</span> : null}
               </div>
-              <button onClick={() => signOut()} className="p-2 text-neutral-200 hover:text-red-500 transition-colors" title="로그아웃">
+              <button onClick={() => signOut()} className="interactive-icon-btn p-2 text-neutral-200 hover:text-red-500 transition-colors" title="로그아웃">
                 <LogOut className="w-5 h-5" />
               </button>
             </>
           ) : (
             <>
-              <Link href="/login" className={cn("px-4 py-2 rounded-md text-sm font-medium transition-colors", "bg-blue-600 text-white hover:bg-blue-700")}>
+              <Link href="/login" className={cn("interactive-btn px-4 py-2 rounded-md text-sm font-medium transition-colors", "bg-blue-600 text-white hover:bg-blue-700")}>
                 로그인
               </Link>
-              <Link href="/register" className="px-4 py-2 rounded-md text-sm font-medium border border-neutral-700 text-neutral-100 hover:bg-neutral-800 transition-colors">
+              <Link href="/register" className="interactive-btn px-4 py-2 rounded-md text-sm font-medium border border-neutral-700 text-neutral-100 hover:bg-neutral-800 transition-colors">
                 회원가입
               </Link>
             </>
