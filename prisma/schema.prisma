@@ -15,11 +15,20 @@ model User {
   password  String   // In a real app, hash this!
   role      String   @default("STUDENT") // ADMIN, STUDENT
   division  String   @default("Bronze") // Bronze, Silver, Gold, Platinum
+  rating    Int      @default(1200)
+  wins      Int      @default(0)
+  losses    Int      @default(0)
+  draws     Int      @default(0)
   solvedCount Int    @default(0)
   createdAt DateTime @default(now())
   
   submissions Submission[]
   contestParticipants ContestParticipant[]
+  duelQueue DuelQueue?
+  duelBattlesAsP1 DuelBattle[] @relation("DuelPlayer1")
+  duelBattlesAsP2 DuelBattle[] @relation("DuelPlayer2")
+  wonDuelBattles DuelBattle[] @relation("DuelWinner")
+  duelRatings DuelRatingHistory[]
 }
 
 model Problem {
@@ -42,6 +51,7 @@ model Problem {
   
   contestId   String?
   contest     Contest? @relation(fields: [contestId], references: [id])
+  duelBattles DuelBattle[]
 }
 
 model ProblemAiReview {
@@ -125,6 +135,61 @@ model ContestParticipant {
 
   @@unique([contestId, userId])
   @@index([contestId, createdAt])
+}
+
+model DuelQueue {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  ratingSnapshot Int
+  joinedAt       DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([joinedAt])
+}
+
+model DuelBattle {
+  id                     String    @id @default(uuid())
+  problemId              String
+  player1Id              String
+  player2Id              String
+  winnerId               String?
+  status                 String    @default("RUNNING") // RUNNING, FINISHED, CANCELLED
+  startedAt              DateTime  @default(now())
+  endedAt                DateTime?
+  durationSec            Int       @default(1800)
+  player1AcceptedAt      DateTime?
+  player2AcceptedAt      DateTime?
+  ratingApplied          Boolean   @default(false)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  problem                Problem   @relation(fields: [problemId], references: [id], onDelete: Restrict)
+  player1                User      @relation("DuelPlayer1", fields: [player1Id], references: [id], onDelete: Cascade)
+  player2                User      @relation("DuelPlayer2", fields: [player2Id], references: [id], onDelete: Cascade)
+  winner                 User?     @relation("DuelWinner", fields: [winnerId], references: [id], onDelete: SetNull)
+  ratings                DuelRatingHistory[]
+
+  @@index([status, createdAt])
+  @@index([player1Id, status])
+  @@index([player2Id, status])
+}
+
+model DuelRatingHistory {
+  id           String   @id @default(uuid())
+  battleId     String
+  userId       String
+  ratingBefore Int
+  ratingAfter  Int
+  ratingChange Int
+  createdAt    DateTime @default(now())
+
+  battle       DuelBattle @relation(fields: [battleId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([battleId, userId])
 }
 
 model PlatformSetting {

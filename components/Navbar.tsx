@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Code2, Trophy, BarChart3, LogOut, User, ShieldPlus, ChevronDown } from "lucide-react";
+import { Code2, Trophy, BarChart3, LogOut, User, ShieldPlus, ChevronDown, Swords } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSession, signOut } from "next-auth/react";
 import { getSessionUser } from "@/lib/session-user";
@@ -14,7 +14,7 @@ const PROBLEM_MENU: Array<{ title: string; items: Array<{ label: string; href: s
       { label: "전체 문제", href: "/problems" },
       { label: "최신 문제", href: "/problems?sort=newest" },
       { label: "많이 푼 문제", href: "/problems?sort=solved" },
-      { label: "태그별 보기", href: "/problems?tag=math" }
+      { label: "태그로 보기", href: "/problems?tag=math" }
     ]
   },
   {
@@ -79,6 +79,7 @@ export default function Navbar() {
               </div>
             </div>
           </div>
+
           <Link href="/status" className="hover:text-blue-400 transition-colors flex items-center gap-1">
             <BarChart3 className="w-4 h-4" />
             채점 현황
@@ -87,22 +88,28 @@ export default function Navbar() {
             <Trophy className="w-4 h-4" />
             랭킹
           </Link>
+          <Link href="/arena" className="hover:text-blue-400 transition-colors flex items-center gap-1">
+            <Swords className="w-4 h-4" />
+            1v1 Arena
+          </Link>
           <Link href="/usaco" className="hover:text-blue-400 transition-colors flex items-center gap-1">
             <Code2 className="w-4 h-4" />
             USACO
           </Link>
-          {session && (
+
+          {session ? (
             <Link href="/profile" className="hover:text-blue-400 transition-colors flex items-center gap-1">
               <User className="w-4 h-4" />
               프로필
             </Link>
-          )}
-          {role === "ADMIN" && (
+          ) : null}
+
+          {role === "ADMIN" ? (
             <Link href="/admin" className="hover:text-blue-400 transition-colors flex items-center gap-1">
               <ShieldPlus className="w-4 h-4" />
               관리자
             </Link>
-          )}
+          ) : null}
         </div>
 
         <div className="flex items-center gap-3">
@@ -129,6 +136,7 @@ export default function Navbar() {
           )}
         </div>
       </div>
+
       {isUsaco ? (
         <div className="usaco-subnav">
           <div className="usaco-subnav-inner">
