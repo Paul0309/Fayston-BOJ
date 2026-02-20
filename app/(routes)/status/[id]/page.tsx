@@ -120,12 +120,15 @@ export default async function SubmissionDetailPage(props: PageProps) {
   });
 
   if (!submission) return notFound();
-  if (isHiddenStatusSubmission(submission.detail) && role !== "ADMIN") redirect("/status");
+  const decodedForAccess = decodeSubmissionDetail(submission.detail);
+  const isArenaSource = decodedForAccess.meta?.source === "ARENA_1V1";
+  const isOwner = !!userId && submission.userId === userId;
+  if (isHiddenStatusSubmission(submission.detail) && role !== "ADMIN" && !(isArenaSource && isOwner)) redirect("/status");
 
   const canView = canViewCode({
     codeVisibility: submission.codeVisibility,
     status: submission.status,
-    isOwner: !!userId && submission.userId === userId,
+    isOwner,
     isAdmin: role === "ADMIN"
   });
   if (!canView) redirect("/status");
@@ -168,6 +171,15 @@ export default async function SubmissionDetailPage(props: PageProps) {
         <Info label="시간" value={submission.timeUsed ? `${submission.timeUsed} ms` : "-"} />
         <Info label="메모리" value={submission.memoryUsed ? `${submission.memoryUsed} KB` : "-"} />
       </div>
+
+      {meta?.source === "ARENA_1V1" && meta.contestId ? (
+        <section className="rounded border border-neutral-700 bg-neutral-900 p-4">
+          <h2 className="font-semibold mb-2">Arena Battle</h2>
+          <Link href={`/arena/battle/${meta.contestId}`} className="text-blue-400 hover:underline">
+            배틀 방으로 이동
+          </Link>
+        </section>
+      ) : null}
 
       <section className="rounded border border-neutral-700 bg-neutral-900 p-4">
         <h2 className="font-semibold mb-2">채점 메시지</h2>

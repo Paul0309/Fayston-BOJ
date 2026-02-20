@@ -29,6 +29,7 @@ model User {
   duelBattlesAsP2 DuelBattle[] @relation("DuelPlayer2")
   wonDuelBattles DuelBattle[] @relation("DuelWinner")
   duelRatings DuelRatingHistory[]
+  duelDrafts DuelDraft[]
 }
 
 model Problem {
@@ -170,6 +171,7 @@ model DuelBattle {
   player2                User      @relation("DuelPlayer2", fields: [player2Id], references: [id], onDelete: Cascade)
   winner                 User?     @relation("DuelWinner", fields: [winnerId], references: [id], onDelete: SetNull)
   ratings                DuelRatingHistory[]
+  drafts                 DuelDraft[]
 
   @@index([status, createdAt])
   @@index([player1Id, status])
@@ -190,6 +192,22 @@ model DuelRatingHistory {
 
   @@index([userId, createdAt])
   @@index([battleId, userId])
+}
+
+model DuelDraft {
+  id        String   @id @default(uuid())
+  battleId  String
+  userId    String
+  language  String
+  code      String
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  battle    DuelBattle @relation(fields: [battleId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([battleId, userId])
+  @@index([battleId, updatedAt])
 }
 
 model PlatformSetting {

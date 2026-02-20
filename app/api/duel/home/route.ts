@@ -41,6 +41,15 @@ export async function GET() {
       me,
       leaderboard,
       activeBattleId: activeBattle?.id || null,
+      activeBattle:
+        activeBattle && {
+          id: activeBattle.id,
+          status: activeBattle.status,
+          opponent:
+            activeBattle.player1Id === userId
+              ? { id: activeBattle.player2.id, name: activeBattle.player2.name, rating: activeBattle.player2.rating }
+              : { id: activeBattle.player1.id, name: activeBattle.player1.name, rating: activeBattle.player1.rating }
+        },
       recent: recent.map((b) => ({
         id: b.id,
         status: b.status,
@@ -57,4 +66,3 @@ export async function GET() {
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
-

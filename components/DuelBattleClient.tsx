@@ -52,6 +52,10 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
   const [language, setLanguage] = useState<SupportedLanguage>("python");
   const [code, setCode] = useState<string>(LANGUAGE_META.python.defaultCode);
   const [submitBusy, setSubmitBusy] = useState(false);
+  const [nowTick, setNowTick] = useState(Date.now());
+  const [opponentDraft, setOpponentDraft] = useState<{ language: string; code: string; updatedAt: string } | null>(null);
+  const [draftBusy, setDraftBusy] = useState(false);
+  const finished = state?.battle.status === "FINISHED";
 
   const loadState = async () => {
     try {
@@ -76,14 +80,54 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
     return () => clearInterval(timer);
   }, [battleId]);
 
+  useEffect(() => {
+    const timer = setInterval(() => setNowTick(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/duel/battle/${battleId}/draft`, { cache: "no-store" });
+        if (!res.ok) return;
+        const json = (await res.json()) as {
+          myDraft: { language: string; code: string; updatedAt: string } | null;
+          opponentDraft: { language: string; code: string; updatedAt: string } | null;
+        };
+        if (json.opponentDraft) setOpponentDraft(json.opponentDraft);
+      } catch {
+        // ignore
+      }
+    }, 1200);
+    return () => clearInterval(timer);
+  }, [battleId]);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      if (!state || finished || draftBusy) return;
+      setDraftBusy(true);
+      try {
+        await fetch(`/api/duel/battle/${battleId}/draft`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ language, code })
+        });
+      } catch {
+        // ignore
+      } finally {
+        setDraftBusy(false);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [battleId, code, draftBusy, finished, language, state]);
+
   const remaining = useMemo(() => {
     if (!state) return 0;
     const end = new Date(state.battle.startedAt).getTime() + state.battle.durationSec * 1000;
-    return Math.max(0, Math.floor((end - Date.now()) / 1000));
-  }, [state]);
+    return Math.max(0, Math.floor((end - nowTick) / 1000));
+  }, [nowTick, state]);
 
   const myAccepted = useMemo(() => state?.mySubmissions.some((s) => s.status === "ACCEPTED") || false, [state]);
-  const finished = state?.battle.status === "FINISHED";
 
   const submit = async () => {
     if (submitBusy || !state || finished) return;
@@ -109,6 +153,14 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
   const meIsP1 = state.battle.player1.id === myUserId;
   const opponent = meIsP1 ? state.battle.player2 : state.battle.player1;
   const myRatingDelta = state.battle.ratings.find((r) => r.userId === myUserId)?.ratingChange || 0;
+
+  const myLatest = state.mySubmissions[0];
+  const winnerName = state.battle.winnerId
+    ? state.battle.winnerId === state.battle.player1.id
+      ? state.battle.player1.name || "Player1"
+      : state.battle.player2.name || "Player2"
+    : "DRAW";
+  const myResult = !finished ? "RUNNING" : state.battle.winnerId === null ? "DRAW" : state.battle.winnerId === myUserId ? "WIN" : "LOSE";
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-4 min-h-[70vh]">
@@ -151,7 +203,13 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
             <div>Opponent submissions: {state.opponentSubmissionCount}</div>
             <div>Opponent accepted: {state.opponentAccepted ? "YES" : "NO"}</div>
             <div>My accepted: {myAccepted ? "YES" : "NO"}</div>
-            {finished ? <div>Rating Δ: {myRatingDelta >= 0 ? `+${myRatingDelta}` : myRatingDelta}</div> : null}
+            {finished ? (
+              <>
+                <div>Winner: {winnerName}</div>
+                <div>My result: {myResult}</div>
+                <div>Rating Δ: {myRatingDelta >= 0 ? `+${myRatingDelta}` : myRatingDelta}</div>
+              </>
+            ) : null}
           </div>
         </section>
       </aside>
@@ -183,23 +241,47 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
             {submitBusy ? "Submitting..." : "Submit"}
           </button>
         </div>
-        <div className="flex-1 min-h-[420px]">
-          <Editor
-            height="100%"
-            theme="vs-dark"
-            language={LANGUAGE_META[language].monaco}
-            value={code}
-            onChange={(value) => setCode(value || "")}
-            options={{
-              minimap: { enabled: false },
-              automaticLayout: true,
-              fontSize: 14,
-              scrollBeyondLastLine: false
-            }}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[420px] flex-1">
+          <div className="border-r border-neutral-700">
+            <div className="px-3 py-1 text-xs text-neutral-400 border-b border-neutral-700">My code</div>
+            <Editor
+              height="100%"
+              theme="vs-dark"
+              language={LANGUAGE_META[language].monaco}
+              value={code}
+              onChange={(value) => setCode(value || "")}
+              options={{
+                minimap: { enabled: false },
+                automaticLayout: true,
+                fontSize: 14,
+                scrollBeyondLastLine: false
+              }}
+            />
+          </div>
+          <div>
+            <div className="px-3 py-1 text-xs text-neutral-400 border-b border-neutral-700">
+              Opponent live code {opponentDraft?.updatedAt ? `(${new Date(opponentDraft.updatedAt).toLocaleTimeString()})` : ""}
+            </div>
+            <Editor
+              height="100%"
+              theme="vs-dark"
+              language={LANGUAGE_META[(opponentDraft?.language as SupportedLanguage) || "python"].monaco}
+              value={opponentDraft?.code || "// Waiting for opponent draft..."}
+              options={{
+                readOnly: true,
+                minimap: { enabled: false },
+                automaticLayout: true,
+                fontSize: 14,
+                scrollBeyondLastLine: false
+              }}
+            />
+          </div>
         </div>
         <div className="border-t border-neutral-700 p-3">
           <h3 className="text-sm font-semibold text-neutral-100 mb-2">My submissions</h3>
+          <div className="mb-2 text-xs text-neutral-300">
+            Latest: {myLatest ? `${myLatest.status}${myLatest.totalScore !== null ? ` ${myLatest.totalScore}/${myLatest.maxScore}` : ""}` : "None"}
+          </div>
           <div className="space-y-1 max-h-44 overflow-auto">
             {state.mySubmissions.map((s) => (
               <div key={s.id} className="rounded border border-neutral-800 px-2 py-1 text-xs flex items-center justify-between">
@@ -214,4 +296,3 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
     </div>
   );
 }
-

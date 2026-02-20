@@ -36,6 +36,11 @@ type HomeData = {
   leaderboard: LeaderboardUser[];
   recent: RecentBattle[];
   activeBattleId: string | null;
+  activeBattle?: {
+    id: string;
+    status: string;
+    opponent: { id: string; name: string | null; rating: number };
+  } | null;
 };
 
 export default function DuelDashboardClient() {
@@ -46,6 +51,7 @@ export default function DuelDashboardClient() {
   const [queueJoinedAt, setQueueJoinedAt] = useState<string | null>(null);
   const [queueBusy, setQueueBusy] = useState(false);
   const [nowTick, setNowTick] = useState(Date.now());
+  const [matchFound, setMatchFound] = useState<HomeData["activeBattle"]>(null);
 
   const load = async () => {
     try {
@@ -57,8 +63,15 @@ export default function DuelDashboardClient() {
       setData(home);
       setInQueue(queue.inQueue);
       setQueueJoinedAt(queue.queueJoinedAt);
-      if (queue.battleId) window.location.href = `/arena/battle/${queue.battleId}`;
-      else if (home.activeBattleId) window.location.href = `/arena/battle/${home.activeBattleId}`;
+      const bid = queue.battleId || home.activeBattleId;
+      if (bid) {
+        setInQueue(false);
+        setQueueJoinedAt(null);
+        setMatchFound(home.activeBattle || { id: bid, status: "RUNNING", opponent: { id: "", name: "Opponent", rating: 0 } });
+        setTimeout(() => {
+          window.location.href = `/arena/battle/${bid}`;
+        }, 1300);
+      }
       setError("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load");
@@ -125,6 +138,16 @@ export default function DuelDashboardClient() {
 
   return (
     <div className="space-y-6">
+      {matchFound ? (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="rounded-xl border border-blue-500/40 bg-neutral-900 p-8 text-center animate-pulse">
+            <div className="text-blue-300 text-xs mb-2">MATCH FOUND</div>
+            <div className="text-3xl font-black text-neutral-100 mb-1">VS {matchFound.opponent.name || "Opponent"}</div>
+            <div className="text-sm text-neutral-400">Rating {matchFound.opponent.rating}</div>
+            <div className="mt-4 text-emerald-300 text-sm">Entering battle room...</div>
+          </div>
+        </div>
+      ) : null}
       {error ? <div className="rounded border border-red-500/50 bg-red-950/40 p-3 text-sm text-red-200">{error}</div> : null}
 
       <div className="rounded-xl border border-neutral-700 bg-neutral-900 p-6">
