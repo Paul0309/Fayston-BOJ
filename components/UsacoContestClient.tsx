@@ -261,10 +261,9 @@ export default function UsacoContestClient({
     problems.every((p) => {
       const row = statuses[p.id];
       if (!row || row.status !== "ACCEPTED") return false;
-      if (typeof row.totalScore === "number" && typeof row.maxScore === "number") {
-        return row.totalScore >= row.maxScore;
-      }
-      return true;
+      if (typeof row.totalScore !== "number" || typeof row.maxScore !== "number") return false;
+      if (row.maxScore <= 0) return false;
+      return row.totalScore >= row.maxScore;
     });
 
   useEffect(() => {
