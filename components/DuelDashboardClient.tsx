@@ -52,6 +52,11 @@ export default function DuelDashboardClient() {
   const [queueBusy, setQueueBusy] = useState(false);
   const [nowTick, setNowTick] = useState(Date.now());
   const [matchFound, setMatchFound] = useState<HomeData["activeBattle"]>(null);
+  const [queueStats, setQueueStats] = useState<{ queueSize: number; position: number | null; estimatedSec: number }>({
+    queueSize: 0,
+    position: null,
+    estimatedSec: 0
+  });
 
   const load = async () => {
     try {
@@ -59,10 +64,22 @@ export default function DuelDashboardClient() {
       if (!homeRes.ok) throw new Error(await homeRes.text());
       if (!queueRes.ok) throw new Error(await queueRes.text());
       const home = (await homeRes.json()) as HomeData;
-      const queue = (await queueRes.json()) as { inQueue: boolean; queueJoinedAt: string | null; battleId: string | null };
+      const queue = (await queueRes.json()) as {
+        inQueue: boolean;
+        queueJoinedAt: string | null;
+        battleId: string | null;
+        queueSize: number;
+        position: number | null;
+        estimatedSec: number;
+      };
       setData(home);
       setInQueue(queue.inQueue);
       setQueueJoinedAt(queue.queueJoinedAt);
+      setQueueStats({
+        queueSize: queue.queueSize || 0,
+        position: queue.position || null,
+        estimatedSec: queue.estimatedSec || 0
+      });
       const bid = queue.battleId || home.activeBattleId;
       if (bid) {
         setInQueue(false);
@@ -180,6 +197,12 @@ export default function DuelDashboardClient() {
             </button>
           )}
           {inQueue ? <span className="text-sm text-amber-300">매칭 중... {Math.floor(queueSeconds / 60)}:{String(queueSeconds % 60).padStart(2, "0")}</span> : null}
+          {inQueue ? (
+            <span className="text-xs text-neutral-400">
+              대기열 {queueStats.position || "-"} / {queueStats.queueSize} · 예상 {Math.floor(queueStats.estimatedSec / 60)}:
+              {String(queueStats.estimatedSec % 60).padStart(2, "0")}
+            </span>
+          ) : null}
         </div>
       </div>
 

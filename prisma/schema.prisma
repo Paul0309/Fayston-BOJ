@@ -200,6 +200,7 @@ model DuelDraft {
   userId    String
   language  String
   code      String
+  cursorMeta String?
   updatedAt DateTime @updatedAt
   createdAt DateTime @default(now())
 

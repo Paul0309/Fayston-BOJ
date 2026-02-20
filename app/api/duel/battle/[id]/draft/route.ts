@@ -28,7 +28,7 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
             userId
           }
         },
-        select: { language: true, code: true, updatedAt: true }
+        select: { language: true, code: true, cursorMeta: true, updatedAt: true }
       }),
       db.duelDraft.findUnique({
         where: {
@@ -37,7 +37,7 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
             userId: opponentId
           }
         },
-        select: { language: true, code: true, updatedAt: true }
+        select: { language: true, code: true, cursorMeta: true, updatedAt: true }
       })
     ]);
 
@@ -61,6 +61,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     const body = await req.json();
     const language = typeof body?.language === "string" ? body.language : "";
     const code = typeof body?.code === "string" ? body.code : "";
+    const cursorMeta =
+      body?.cursorMeta && typeof body.cursorMeta === "object" ? JSON.stringify(body.cursorMeta).slice(0, 2000) : null;
     if (!isSupportedLanguage(language)) return new NextResponse("Unsupported language", { status: 400 });
     if (!code) return new NextResponse("Code is required", { status: 400 });
     if (code.length > 256 * 1024) return new NextResponse("Code too large", { status: 400 });
@@ -79,8 +81,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
           userId
         }
       },
-      update: { language, code },
-      create: { battleId: id, userId, language, code }
+      update: { language, code, cursorMeta },
+      create: { battleId: id, userId, language, code, cursorMeta }
     });
 
     return NextResponse.json({ ok: true });
@@ -89,4 +91,3 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
-

@@ -53,8 +53,18 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
   const [code, setCode] = useState<string>(LANGUAGE_META.python.defaultCode);
   const [submitBusy, setSubmitBusy] = useState(false);
   const [nowTick, setNowTick] = useState(Date.now());
-  const [opponentDraft, setOpponentDraft] = useState<{ language: string; code: string; updatedAt: string } | null>(null);
+  const [opponentDraft, setOpponentDraft] = useState<{ language: string; code: string; cursorMeta?: string | null; updatedAt: string } | null>(null);
   const [draftBusy, setDraftBusy] = useState(false);
+  const [myCursorMeta, setMyCursorMeta] = useState<{
+    line: number;
+    column: number;
+    selectionStartLine: number;
+    selectionStartColumn: number;
+    selectionEndLine: number;
+    selectionEndColumn: number;
+  } | null>(null);
+  const [showFinishOverlay, setShowFinishOverlay] = useState(false);
+  const [confettiSeed, setConfettiSeed] = useState(0);
   const finished = state?.battle.status === "FINISHED";
 
   const loadState = async () => {
@@ -91,8 +101,8 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
         const res = await fetch(`/api/duel/battle/${battleId}/draft`, { cache: "no-store" });
         if (!res.ok) return;
         const json = (await res.json()) as {
-          myDraft: { language: string; code: string; updatedAt: string } | null;
-          opponentDraft: { language: string; code: string; updatedAt: string } | null;
+          myDraft: { language: string; code: string; cursorMeta: string | null; updatedAt: string } | null;
+          opponentDraft: { language: string; code: string; cursorMeta: string | null; updatedAt: string } | null;
         };
         if (json.opponentDraft) setOpponentDraft(json.opponentDraft);
       } catch {
@@ -110,7 +120,7 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
         await fetch(`/api/duel/battle/${battleId}/draft`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ language, code })
+          body: JSON.stringify({ language, code, cursorMeta: myCursorMeta })
         });
       } catch {
         // ignore
@@ -119,7 +129,14 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
       }
     }, 500);
     return () => clearTimeout(timer);
-  }, [battleId, code, draftBusy, finished, language, state]);
+  }, [battleId, code, draftBusy, finished, language, myCursorMeta, state]);
+
+  useEffect(() => {
+    if (finished) {
+      setShowFinishOverlay(true);
+      setConfettiSeed((v) => v + 1);
+    }
+  }, [finished]);
 
   const remaining = useMemo(() => {
     if (!state) return 0;
@@ -164,6 +181,29 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-4 min-h-[70vh]">
+      {showFinishOverlay && finished ? (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-[2px] flex items-center justify-center">
+          <div className="duel-confetti-wrap" key={confettiSeed}>
+            {Array.from({ length: 32 }).map((_, idx) => (
+              <span key={idx} className="duel-confetti" style={{ left: `${(idx * 17) % 100}%`, animationDelay: `${(idx % 8) * 0.12}s` }} />
+            ))}
+          </div>
+          <div className="rounded-xl border border-emerald-500/40 bg-neutral-900 p-8 text-center relative z-[1]">
+            <h2 className="text-3xl font-black text-neutral-100 mb-2">{myResult === "WIN" ? "Victory!" : myResult === "LOSE" ? "Defeat" : "Draw"}</h2>
+            <div className="text-sm text-neutral-300 mb-1">Winner: {winnerName}</div>
+            <div className={`text-lg font-bold ${myRatingDelta >= 0 ? "text-emerald-300" : "text-red-300"}`}>
+              Rating {myRatingDelta >= 0 ? `+${myRatingDelta}` : myRatingDelta}
+            </div>
+            <button
+              type="button"
+              className="mt-4 rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
+              onClick={() => setShowFinishOverlay(false)}
+            >
+              Continue
+            </button>
+          </div>
+        </div>
+      ) : null}
       {error ? <div className="xl:col-span-2 rounded border border-red-500/50 bg-red-950/40 p-3 text-sm text-red-200">{error}</div> : null}
 
       <aside className="rounded-xl border border-neutral-700 bg-neutral-900 p-4 space-y-4 overflow-auto">
@@ -241,10 +281,11 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
             {submitBusy ? "Submitting..." : "Submit"}
           </button>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-2 min-h-[420px] flex-1">
+        <div className="grid grid-cols-1 lg:grid-cols-2 h-[65vh] min-h-[420px] max-h-[780px] flex-none">
           <div className="border-r border-neutral-700">
             <div className="px-3 py-1 text-xs text-neutral-400 border-b border-neutral-700">My code</div>
             <Editor
+              key={opponentDraft?.updatedAt || "opp-editor"}
               height="100%"
               theme="vs-dark"
               language={LANGUAGE_META[language].monaco}
@@ -255,6 +296,30 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
                 automaticLayout: true,
                 fontSize: 14,
                 scrollBeyondLastLine: false
+              }}
+              onMount={(editor) => {
+                editor.onDidChangeCursorPosition((e) => {
+                  const sel = editor.getSelection();
+                  setMyCursorMeta({
+                    line: e.position.lineNumber,
+                    column: e.position.column,
+                    selectionStartLine: sel?.startLineNumber || e.position.lineNumber,
+                    selectionStartColumn: sel?.startColumn || e.position.column,
+                    selectionEndLine: sel?.endLineNumber || e.position.lineNumber,
+                    selectionEndColumn: sel?.endColumn || e.position.column
+                  });
+                });
+                editor.onDidChangeCursorSelection((e) => {
+                  const s = e.selection;
+                  setMyCursorMeta((prev) => ({
+                    line: prev?.line || s.positionLineNumber,
+                    column: prev?.column || s.positionColumn,
+                    selectionStartLine: s.startLineNumber,
+                    selectionStartColumn: s.startColumn,
+                    selectionEndLine: s.endLineNumber,
+                    selectionEndColumn: s.endColumn
+                  }));
+                });
               }}
             />
           </div>
@@ -267,6 +332,45 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
               theme="vs-dark"
               language={LANGUAGE_META[(opponentDraft?.language as SupportedLanguage) || "python"].monaco}
               value={opponentDraft?.code || "// Waiting for opponent draft..."}
+              onMount={(editor, monaco) => {
+                const raw = opponentDraft?.cursorMeta;
+                if (!raw) return;
+                try {
+                  const parsed = JSON.parse(raw) as {
+                    line: number;
+                    column: number;
+                    selectionStartLine: number;
+                    selectionStartColumn: number;
+                    selectionEndLine: number;
+                    selectionEndColumn: number;
+                  };
+                  editor.deltaDecorations(
+                    [],
+                    [
+                      {
+                        range: new monaco.Range(
+                          parsed.line || 1,
+                          parsed.column || 1,
+                          parsed.line || 1,
+                          Math.max((parsed.column || 1) + 1, 2)
+                        ),
+                        options: { inlineClassName: "duel-opp-cursor" }
+                      },
+                      {
+                        range: new monaco.Range(
+                          parsed.selectionStartLine || parsed.line || 1,
+                          parsed.selectionStartColumn || parsed.column || 1,
+                          parsed.selectionEndLine || parsed.line || 1,
+                          parsed.selectionEndColumn || parsed.column || 1
+                        ),
+                        options: { inlineClassName: "duel-opp-selection" }
+                      }
+                    ]
+                  );
+                } catch {
+                  // ignore parse error
+                }
+              }}
               options={{
                 readOnly: true,
                 minimap: { enabled: false },
