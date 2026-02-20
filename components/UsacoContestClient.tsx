@@ -485,8 +485,14 @@ export default function UsacoContestClient({
           <div className="usaco-q-tabs">
             {problems.map((problem, idx) => {
               const active = selected?.id === problem.id;
+              const solved = statuses[problem.id]?.status === "ACCEPTED";
               return (
-                <button key={problem.id} type="button" className={`usaco-q-tab ${active ? "active" : ""}`} onClick={() => setSelectedId(problem.id)}>
+                <button
+                  key={problem.id}
+                  type="button"
+                  className={`usaco-q-tab ${active ? "active" : ""} ${solved ? "solved" : ""}`}
+                  onClick={() => setSelectedId(problem.id)}
+                >
                   Q{idx + 1}
                 </button>
               );

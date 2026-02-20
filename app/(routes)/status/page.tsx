@@ -46,6 +46,7 @@ export default async function StatusPage(props: PageProps) {
     const where = {
         AND: [
             { NOT: { detail: { contains: '"hiddenInStatus":true' } } },
+            { NOT: { problem: { tags: { contains: "usaco" } } } },
             ...(problemId ? [{ problemId }] : []),
             ...(status !== "ALL" ? [{ status }] : []),
             ...(language !== "ALL" ? [{ language }] : []),
@@ -75,7 +76,12 @@ export default async function StatusPage(props: PageProps) {
         withDbRetry(() => db.submission.count({ where })),
         getJudgeQueueStats(),
         withDbRetry(() => db.submission.findMany({
-            where: { NOT: { detail: { contains: '"hiddenInStatus":true' } } },
+            where: {
+                AND: [
+                    { NOT: { detail: { contains: '"hiddenInStatus":true' } } },
+                    { NOT: { problem: { tags: { contains: "usaco" } } } }
+                ]
+            },
             distinct: ["language"],
             select: { language: true },
             orderBy: { language: "asc" }

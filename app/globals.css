@@ -429,6 +429,16 @@ body {
   border-bottom-color: #4e8df7;
 }
 
+.usaco-q-tab.solved {
+  color: #2fd27f;
+  border-bottom-color: #2fd27f;
+}
+
+.usaco-q-tab.active.solved {
+  color: #46e491;
+  border-bottom-color: #46e491;
+}
+
 .usaco-problem-scroll {
   overflow: auto;
   min-height: 0;
