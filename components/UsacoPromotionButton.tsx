@@ -18,8 +18,6 @@ export default function UsacoPromotionButton({ eligible, canPromote, message }: 
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState("");
 
-  if (!eligible) return null;
-
   const onPromote = async () => {
     if (busy) return;
     setBusy(true);
@@ -47,7 +45,7 @@ export default function UsacoPromotionButton({ eligible, canPromote, message }: 
       <button
         type="button"
         className="mt-2 rounded border border-emerald-700 bg-emerald-900/40 px-3 py-1.5 text-xs font-semibold text-emerald-200 hover:bg-emerald-900/60 disabled:opacity-60"
-        disabled={!canPromote || busy}
+        disabled={!eligible || !canPromote || busy}
         onClick={onPromote}
       >
         {busy ? "처리 중..." : "프로모션 받기"}
