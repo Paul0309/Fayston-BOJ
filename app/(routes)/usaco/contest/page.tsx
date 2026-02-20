@@ -6,13 +6,7 @@ import { db } from "@/lib/db";
 import UsacoContestClient from "@/components/UsacoContestClient";
 import { getAllowedLanguages } from "@/lib/language-settings";
 import { decodeSubmissionDetail } from "@/lib/submission-meta";
-
-const DIVISIONS = ["Bronze", "Silver", "Gold", "Platinum"] as const;
-type Division = (typeof DIVISIONS)[number];
-
-function asDivision(input: string | undefined): Division {
-  return DIVISIONS.includes(input as Division) ? (input as Division) : "Bronze";
-}
+import { asUsacoDivision, ensureContestParticipant, findActiveUsacoContestByDivision } from "@/lib/usaco/contest";
 
 export const dynamic = "force-dynamic";
 
@@ -25,16 +19,23 @@ export default async function UsacoContestPage() {
     where: { id: user.id },
     select: { division: true }
   });
-  const division = asDivision(userProfile?.division || user.division);
-  const divisionTag = `division:${division.toLowerCase()}`;
+  const division = asUsacoDivision(userProfile?.division || user.division);
   const allowedLanguages = await getAllowedLanguages();
 
+  const contest = await findActiveUsacoContestByDivision(division);
+  if (!contest) {
+    return (
+      <div className="rounded-xl border border-amber-500/40 bg-amber-950/20 p-5 text-amber-100">
+        No active USACO contest for your division.
+      </div>
+    );
+  }
+
+  await ensureContestParticipant(contest.id, user.id);
+
   const problems = await db.problem.findMany({
-    where: {
-      AND: [{ tags: { contains: "usaco" } }, { tags: { contains: divisionTag } }]
-    },
+    where: { contestId: contest.id },
     orderBy: { number: "asc" },
-    take: 3,
     select: {
       id: true,
       number: true,
@@ -51,13 +52,15 @@ export default async function UsacoContestPage() {
         orderBy: { id: "asc" },
         select: { input: true, output: true, groupName: true, isHidden: true, score: true }
       }
-    }
+    },
+    take: 3
   });
 
   const statuses = await db.submission.findMany({
     where: {
       userId: user.id,
-      problemId: { in: problems.map((p) => p.id) }
+      problemId: { in: problems.map((p) => p.id) },
+      detail: { contains: `"contestId":"${contest.id}"` }
     },
     orderBy: { createdAt: "desc" },
     take: 200,
@@ -141,6 +144,7 @@ export default async function UsacoContestPage() {
   return (
     <UsacoContestClient
       division={division}
+      contestId={contest.id}
       userId={user.id}
       allowedLanguages={allowedLanguages}
       problems={problems.map((p) => ({

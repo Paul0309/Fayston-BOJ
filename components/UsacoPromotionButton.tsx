@@ -28,7 +28,7 @@ export default function UsacoPromotionButton({ eligible, canPromote, message }: 
         return;
       }
       const data = (await res.json()) as PromoteResponse;
-      setResult(data.message || (data.promoted ? "승급되었습니다." : "조건을 확인하세요."));
+      setResult(data.message || (data.promoted ? "승급 처리 완료" : "승급 조건을 확인하세요."));
       if (data.promoted) {
         setTimeout(() => window.location.reload(), 600);
       }

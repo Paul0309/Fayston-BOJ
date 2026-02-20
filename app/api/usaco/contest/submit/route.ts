@@ -7,6 +7,7 @@ import { getAllowedLanguages } from "@/lib/language-settings";
 import { isSupportedLanguage } from "@/lib/languages";
 import { enqueueSubmissionForJudge } from "@/lib/judge/queue";
 import { encodeSubmissionDetail } from "@/lib/submission-meta";
+import { asUsacoDivision, ensureContestParticipant, findActiveUsacoContestByDivision } from "@/lib/usaco/contest";
 
 export async function POST(req: Request) {
   try {
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
     if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
     const body = await req.json();
-    const { problemId, code, language } = body || {};
+    const { problemId, code, language, contestId } = body || {};
 
     if (!problemId || !code || !language) {
       return new NextResponse("Missing fields", { status: 400 });
@@ -24,13 +25,24 @@ export async function POST(req: Request) {
       return new NextResponse("Unsupported language", { status: 400 });
     }
 
-    const problem = await db.problem.findUnique({
-      where: { id: String(problemId) },
-      select: { id: true, tags: true }
+    const me = await db.user.findUnique({
+      where: { id: userId },
+      select: { division: true }
     });
-    if (!problem || !problem.tags.includes("usaco")) {
+    const contest = await findActiveUsacoContestByDivision(asUsacoDivision(me?.division));
+    if (!contest || contest.id !== String(contestId)) {
+      return new NextResponse("No active contest for your division", { status: 400 });
+    }
+
+    const problem = await db.problem.findFirst({
+      where: { id: String(problemId), contestId: contest.id },
+      select: { id: true }
+    });
+    if (!problem) {
       return new NextResponse("Invalid contest problem", { status: 400 });
     }
+
+    await ensureContestParticipant(contest.id, userId);
 
     const allowedLanguages = await getAllowedLanguages();
     if (!allowedLanguages.includes(language)) {
@@ -39,7 +51,8 @@ export async function POST(req: Request) {
 
     const detail = encodeSubmissionDetail("Queued for judge", {
       hiddenInStatus: true,
-      source: "USACO_CONTEST"
+      source: "USACO_CONTEST",
+      contestId: contest.id
     });
 
     const submission = await db.submission.create({

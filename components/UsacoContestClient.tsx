@@ -77,6 +77,7 @@ type PromotionStatusResponse = {
 
 interface UsacoContestClientProps {
   division: string;
+  contestId: string;
   userId: string;
   allowedLanguages: SupportedLanguage[];
   problems: ContestProblem[];
@@ -225,6 +226,7 @@ function CopyButton({ value }: { value: string }) {
 
 export default function UsacoContestClient({
   division,
+  contestId,
   userId,
   allowedLanguages,
   problems,
@@ -331,7 +333,10 @@ export default function UsacoContestClient({
     const ids = problems.map((p) => p.id).join(",");
     const load = async () => {
       try {
-        const res = await fetch(`/api/usaco/contest/progress?problemIds=${encodeURIComponent(ids)}`, { cache: "no-store" });
+        const res = await fetch(
+          `/api/usaco/contest/progress?problemIds=${encodeURIComponent(ids)}&contestId=${encodeURIComponent(contestId)}`,
+          { cache: "no-store" }
+        );
         if (!res.ok) return;
         const data = await res.json();
         if (!alive) return;
@@ -347,7 +352,7 @@ export default function UsacoContestClient({
       alive = false;
       clearInterval(poll);
     };
-  }, [problems]);
+  }, [contestId, problems]);
 
   useEffect(() => {
     const onSaveHotkey = (e: KeyboardEvent) => {
@@ -464,7 +469,10 @@ export default function UsacoContestClient({
 
   const refreshProgress = async () => {
     const ids = problems.map((p) => p.id).join(",");
-    const progressRes = await fetch(`/api/usaco/contest/progress?problemIds=${encodeURIComponent(ids)}`, { cache: "no-store" });
+    const progressRes = await fetch(
+      `/api/usaco/contest/progress?problemIds=${encodeURIComponent(ids)}&contestId=${encodeURIComponent(contestId)}`,
+      { cache: "no-store" }
+    );
     if (!progressRes.ok) return;
     const data = await progressRes.json();
     setStatuses(data.statuses || {});
@@ -482,7 +490,8 @@ export default function UsacoContestClient({
         body: JSON.stringify({
           problemId: selected.id,
           code: activeFile.code,
-          language: activeFile.language
+          language: activeFile.language,
+          contestId
         })
       });
       if (!res.ok) {

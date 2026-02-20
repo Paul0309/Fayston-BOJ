@@ -13,6 +13,7 @@ export type SubmissionMeta = {
   groupScores?: SubmissionGroupScoreMeta[];
   hiddenInStatus?: boolean;
   source?: string;
+  contestId?: string;
 };
 
 const META_PREFIX = "@@META@@";

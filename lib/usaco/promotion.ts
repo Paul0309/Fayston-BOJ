@@ -1,7 +1,5 @@
 import { db } from "@/lib/db";
-
-export const USACO_DIVISIONS = ["Bronze", "Silver", "Gold", "Platinum"] as const;
-export type UsacoDivision = (typeof USACO_DIVISIONS)[number];
+import { asUsacoDivision, findActiveUsacoContestByDivision, USACO_DIVISIONS, type UsacoDivision } from "@/lib/usaco/contest";
 
 export type PromotionCheckResult = {
   currentDivision: UsacoDivision;
@@ -11,10 +9,6 @@ export type PromotionCheckResult = {
   deadlinePassed: boolean;
   message: string;
 };
-
-function asDivision(value?: string | null): UsacoDivision {
-  return USACO_DIVISIONS.includes(value as UsacoDivision) ? (value as UsacoDivision) : "Bronze";
-}
 
 function getNextDivision(current: UsacoDivision): UsacoDivision | null {
   const idx = USACO_DIVISIONS.indexOf(current);
@@ -35,7 +29,7 @@ export async function checkUserUsacoPromotionEligibility(userId: string): Promis
     where: { id: userId },
     select: { division: true }
   });
-  const currentDivision = asDivision(me?.division);
+  const currentDivision = asUsacoDivision(me?.division);
   const nextDivision = getNextDivision(currentDivision);
 
   if (!nextDivision) {
@@ -49,16 +43,39 @@ export async function checkUserUsacoPromotionEligibility(userId: string): Promis
     };
   }
 
-  const divisionTag = `division:${currentDivision.toLowerCase()}`;
-  const problems = await db.problem.findMany({
+  const contest = await findActiveUsacoContestByDivision(currentDivision);
+  if (!contest) {
+    return {
+      currentDivision,
+      nextDivision,
+      eligible: false,
+      canPromote: false,
+      deadlinePassed: false,
+      message: "현재 진행 중인 대회가 없습니다."
+    };
+  }
+
+  const isParticipant = await db.contestParticipant.findUnique({
     where: {
-      AND: [{ tags: { contains: "usaco" } }, { tags: { contains: divisionTag } }]
+      contestId_userId: {
+        contestId: contest.id,
+        userId
+      }
     },
-    orderBy: { number: "asc" },
-    take: 3,
     select: { id: true }
   });
+  if (!isParticipant) {
+    return {
+      currentDivision,
+      nextDivision,
+      eligible: false,
+      canPromote: false,
+      deadlinePassed: false,
+      message: "이 대회의 참가자 등록이 필요합니다."
+    };
+  }
 
+  const problems = contest.problems.map((p) => ({ id: p.id }));
   if (problems.length === 0) {
     return {
       currentDivision,
@@ -66,14 +83,15 @@ export async function checkUserUsacoPromotionEligibility(userId: string): Promis
       eligible: false,
       canPromote: false,
       deadlinePassed: false,
-      message: "현재 디비전에 등록된 대회 문제가 없습니다."
+      message: "대회 문제가 아직 등록되지 않았습니다."
     };
   }
 
   const submissions = await db.submission.findMany({
     where: {
       userId,
-      problemId: { in: problems.map((p) => p.id) }
+      problemId: { in: problems.map((p) => p.id) },
+      detail: { contains: `"contestId":"${contest.id}"` }
     },
     orderBy: { createdAt: "desc" },
     select: {
@@ -108,7 +126,7 @@ export async function checkUserUsacoPromotionEligibility(userId: string): Promis
     };
   }
 
-  const deadlinePassed = isPromotionDeadlinePassed();
+  const deadlinePassed = new Date().getTime() > contest.endTime.getTime() || isPromotionDeadlinePassed();
   if (deadlinePassed) {
     return {
       currentDivision,
@@ -116,7 +134,7 @@ export async function checkUserUsacoPromotionEligibility(userId: string): Promis
       eligible: true,
       canPromote: false,
       deadlinePassed: true,
-      message: "프로모션 가능한 대회 기간이 종료되었습니다."
+      message: "프로모션 가능 기간이 종료되었습니다."
     };
   }
 
@@ -126,6 +144,6 @@ export async function checkUserUsacoPromotionEligibility(userId: string): Promis
     eligible: true,
     canPromote: true,
     deadlinePassed: false,
-    message: `축하합니다! ${currentDivision} 만점 완료. ${nextDivision}로 승급할 수 있습니다.`
+    message: `축하합니다. ${currentDivision} 만점 완료, ${nextDivision}로 승급 가능합니다.`
   };
 }

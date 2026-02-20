@@ -12,10 +12,7 @@ export async function GET() {
     if (!userId) return new NextResponse("Unauthorized", { status: 401 });
 
     const result = await checkUserUsacoPromotionEligibility(userId);
-    return NextResponse.json({
-      ok: true,
-      ...result
-    });
+    return NextResponse.json({ ok: true, ...result });
   } catch (error) {
     console.error("[USACO_CONTEST_PROMOTION_GET]", error);
     return new NextResponse("Internal Error", { status: 500 });
@@ -27,6 +24,7 @@ export async function POST() {
     const session = await getServerSession(authOptions);
     const userId = getSessionUser(session).id;
     if (!userId) return new NextResponse("Unauthorized", { status: 401 });
+
     const check = await checkUserUsacoPromotionEligibility(userId);
     if (!check.eligible || !check.canPromote || !check.nextDivision) {
       return NextResponse.json({
@@ -47,7 +45,7 @@ export async function POST() {
       promoted: true,
       division: check.nextDivision,
       previousDivision: check.currentDivision,
-      message: `축하합니다! ${check.currentDivision}에서 ${check.nextDivision}로 승급되었습니다.`
+      message: `축하합니다. ${check.currentDivision}에서 ${check.nextDivision}로 승급했습니다.`
     });
   } catch (error) {
     console.error("[USACO_CONTEST_PROMOTION_POST]", error);

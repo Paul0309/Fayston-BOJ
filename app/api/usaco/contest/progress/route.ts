@@ -13,6 +13,7 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const idsRaw = (searchParams.get("problemIds") || "").trim();
+    const contestId = (searchParams.get("contestId") || "").trim();
     const ids = idsRaw
       .split(",")
       .map((v) => v.trim())
@@ -24,7 +25,10 @@ export async function GET(req: Request) {
     const rows = await db.submission.findMany({
       where: {
         userId: user.id,
-        problemId: { in: ids }
+        problemId: { in: ids },
+        detail: {
+          contains: contestId ? `"contestId":"${contestId}"` : '"source":"USACO_CONTEST"'
+        }
       },
       orderBy: { createdAt: "desc" },
       take: 200,
