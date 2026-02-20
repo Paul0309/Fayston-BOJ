@@ -6,6 +6,11 @@ import { runSnippet } from "@/lib/judge/run-snippet";
 
 export async function POST(req: Request) {
   try {
+    const runEnabled = process.env.ENABLE_REMOTE_RUN === "1" || !process.env.VERCEL;
+    if (!runEnabled) {
+      return new NextResponse("Run is disabled in this deployment. Use Submit for judging.", { status: 503 });
+    }
+
     const body = await req.json();
     const problemId = typeof body?.problemId === "string" ? body.problemId : "";
     const code = typeof body?.code === "string" ? body.code : "";
@@ -45,4 +50,3 @@ export async function POST(req: Request) {
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
-

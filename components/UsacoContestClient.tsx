@@ -177,6 +177,7 @@ export default function UsacoContestClient({
   initialLogsByProblem
 }: UsacoContestClientProps) {
   const initial = getInitialContestState(division, userId, problems);
+  const runEnabled = process.env.NEXT_PUBLIC_ENABLE_REMOTE_RUN === "1" || process.env.NODE_ENV !== "production";
 
   const [selectedId, setSelectedId] = useState(initial.selectedId);
   const [startAt, setStartAt] = useState<number>(initial.startAt);
@@ -345,6 +346,13 @@ export default function UsacoContestClient({
   };
 
   const handleRun = async () => {
+    if (!runEnabled) {
+      setOutputMode("run");
+      setRunStatus("DISABLED");
+      setRunStdout("");
+      setRunStderr("Run is disabled in production. Use Submit for worker-based judging.");
+      return;
+    }
     if (!selected || !selectedState || !activeFile || runBusy || submitBusy || isEnded) return;
     setOutputMode("run");
     setRunBusy(true);
@@ -672,8 +680,14 @@ export default function UsacoContestClient({
               ))}
             </select>
 
-            <button type="button" className="usaco-run-btn" onClick={handleRun} disabled={!activeFile || runBusy || submitBusy || isEnded}>
-              {runBusy ? "Running..." : "Run"}
+            <button
+              type="button"
+              className="usaco-run-btn"
+              onClick={handleRun}
+              disabled={!runEnabled || !activeFile || runBusy || submitBusy || isEnded}
+              title={!runEnabled ? "Production에서는 Run이 비활성화됩니다. Submit을 사용하세요." : undefined}
+            >
+              {!runEnabled ? "Run disabled" : runBusy ? "Running..." : "Run"}
             </button>
             <button type="button" className="usaco-submit-btn" onClick={handleSubmit} disabled={!activeFile || submitBusy || runBusy || isEnded}>
               {submitBusy ? "Submitting..." : "Submit"}

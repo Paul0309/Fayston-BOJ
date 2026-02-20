@@ -35,6 +35,7 @@ export default function SubmitForm({
 }: SubmitFormProps) {
   const router = useRouter();
   const completionRegisteredRef = useRef(false);
+  const runEnabled = process.env.NEXT_PUBLIC_ENABLE_REMOTE_RUN === "1" || process.env.NODE_ENV !== "production";
 
   const languages = useMemo(() => {
     const source = allowedLanguages && allowedLanguages.length > 0 ? allowedLanguages : DEFAULT_ALLOWED_LANGUAGES;
@@ -136,6 +137,14 @@ export default function SubmitForm({
   };
 
   const handleRun = async () => {
+    if (!runEnabled) {
+      setRunStatus("DISABLED");
+      setRunStdout("");
+      setRunStderr("Run is disabled in production. Use Submit for worker-based judging.");
+      setRunTimeMs(null);
+      return;
+    }
+
     if (!problemId) {
       alert("문제를 선택해주세요.");
       return;
@@ -352,10 +361,11 @@ export default function SubmitForm({
               "bg-blue-600 text-white hover:bg-blue-700 shadow-sm hover:shadow disabled:opacity-60"
             )}
             onClick={handleRun}
-            disabled={running}
+            disabled={running || !runEnabled}
+            title={!runEnabled ? "프로덕션에서는 Run이 비활성화됩니다. Submit을 사용하세요." : undefined}
           >
             <Play className="w-4 h-4" />
-            {running ? "실행 중..." : "실행"}
+            {!runEnabled ? "실행 비활성화" : running ? "실행 중..." : "실행"}
           </button>
 
           <button
