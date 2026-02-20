@@ -62,6 +62,7 @@ export default async function StatusPage(props: PageProps) {
       : {
           AND: [
             { NOT: { detail: { contains: '"hiddenInStatus":true' } } },
+            { NOT: { detail: { contains: '"source":"ARENA_1V1"' } } },
             { NOT: { problem: { tags: { contains: "usaco" } } } },
             ...(problemId ? [{ problemId }] : []),
             ...(status !== "ALL" ? [{ status }] : []),
@@ -80,7 +81,11 @@ export default async function StatusPage(props: PageProps) {
           ]
         }
       : {
-          AND: [{ NOT: { detail: { contains: '"hiddenInStatus":true' } } }, { NOT: { problem: { tags: { contains: "usaco" } } } }]
+          AND: [
+            { NOT: { detail: { contains: '"hiddenInStatus":true' } } },
+            { NOT: { detail: { contains: '"source":"ARENA_1V1"' } } },
+            { NOT: { problem: { tags: { contains: "usaco" } } } }
+          ]
         };
 
   const [problem, submissions, totalCount, queueStats, languageRows] = await Promise.all([

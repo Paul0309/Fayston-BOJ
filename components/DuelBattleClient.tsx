@@ -40,6 +40,17 @@ type BattleState = {
     failedCase: number | null;
     createdAt: string;
   }>;
+  opponentSubmissions: Array<{
+    id: string;
+    status: string;
+    totalScore: number | null;
+    maxScore: number | null;
+    failedCase: number | null;
+    createdAt: string;
+  }>;
+  myBestScore: number;
+  opponentBestScore: number;
+  scoreMax: number | null;
   opponentSubmissionCount: number;
   opponentAccepted: boolean;
 };
@@ -189,6 +200,11 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
   }, [nowTick, state]);
 
   const myAccepted = useMemo(() => state?.mySubmissions.some((s) => s.status === "ACCEPTED") || false, [state]);
+  const myBestScore = state?.myBestScore || 0;
+  const opponentBestScore = state?.opponentBestScore || 0;
+  const scoreMax = state?.scoreMax || 0;
+  const myScorePercent = scoreMax > 0 ? Math.min(100, Math.round((myBestScore / scoreMax) * 100)) : 0;
+  const oppScorePercent = scoreMax > 0 ? Math.min(100, Math.round((opponentBestScore / scoreMax) * 100)) : 0;
 
   const submit = async () => {
     if (submitBusy || !state || finished) return;
@@ -216,12 +232,29 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
   const myRatingDelta = state.battle.ratings.find((r) => r.userId === myUserId)?.ratingChange || 0;
 
   const myLatest = state.mySubmissions[0];
+  const oppLatest = state.opponentSubmissions[0];
   const winnerName = state.battle.winnerId
     ? state.battle.winnerId === state.battle.player1.id
       ? state.battle.player1.name || "Player1"
       : state.battle.player2.name || "Player2"
     : "DRAW";
   const myResult = !finished ? "RUNNING" : state.battle.winnerId === null ? "DRAW" : state.battle.winnerId === myUserId ? "WIN" : "LOSE";
+  const leadLabel =
+    finished
+      ? myResult === "WIN"
+        ? "You won"
+        : myResult === "LOSE"
+          ? "Opponent won"
+          : "Draw"
+      : myAccepted
+        ? "You solved first"
+        : state.opponentAccepted
+          ? "Opponent solved first"
+          : myBestScore === opponentBestScore
+            ? "Even"
+            : myBestScore > opponentBestScore
+              ? "You are leading"
+              : "Opponent is leading";
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[420px_1fr] gap-4 min-h-[70vh]">
@@ -284,6 +317,7 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
             <div>Opponent: {opponent.name || "Unknown"} ({opponent.rating})</div>
             <div>Status: {state.battle.status}</div>
             <div>Remaining: {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, "0")}</div>
+            <div className="text-blue-300 font-semibold">Lead: {leadLabel}</div>
             <div>Opponent submissions: {state.opponentSubmissionCount}</div>
             <div>Opponent accepted: {state.opponentAccepted ? "YES" : "NO"}</div>
             <div>My accepted: {myAccepted ? "YES" : "NO"}</div>
@@ -294,6 +328,29 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
                 <div>Rating Δ: {myRatingDelta >= 0 ? `+${myRatingDelta}` : myRatingDelta}</div>
               </>
             ) : null}
+          </div>
+        </section>
+        <section>
+          <h2 className="text-sm font-semibold text-neutral-100 mb-2">Live score</h2>
+          <div className="space-y-2">
+            <div>
+              <div className="mb-1 flex items-center justify-between text-xs">
+                <span className="text-neutral-300">Me</span>
+                <span className="font-mono text-emerald-300">{myBestScore}{scoreMax > 0 ? ` / ${scoreMax}` : ""}</span>
+              </div>
+              <div className="h-2 rounded bg-neutral-800 overflow-hidden">
+                <div className="h-full bg-emerald-500" style={{ width: `${myScorePercent}%` }} />
+              </div>
+            </div>
+            <div>
+              <div className="mb-1 flex items-center justify-between text-xs">
+                <span className="text-neutral-300">{opponent.name || "Opponent"}</span>
+                <span className="font-mono text-blue-300">{opponentBestScore}{scoreMax > 0 ? ` / ${scoreMax}` : ""}</span>
+              </div>
+              <div className="h-2 rounded bg-neutral-800 overflow-hidden">
+                <div className="h-full bg-blue-500" style={{ width: `${oppScorePercent}%` }} />
+              </div>
+            </div>
           </div>
         </section>
       </aside>
@@ -390,18 +447,43 @@ export default function DuelBattleClient({ battleId, myUserId }: { battleId: str
           </div>
         </div>
         <div className="border-t border-neutral-700 p-3">
-          <h3 className="text-sm font-semibold text-neutral-100 mb-2">My submissions</h3>
-          <div className="mb-2 text-xs text-neutral-300">
-            Latest: {myLatest ? `${myLatest.status}${myLatest.totalScore !== null ? ` ${myLatest.totalScore}/${myLatest.maxScore}` : ""}` : "None"}
+          <h3 className="text-sm font-semibold text-neutral-100 mb-2">Submission feed</h3>
+          <div className="mb-2 grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+            <div className="rounded border border-neutral-800 bg-neutral-950/60 p-2">
+              <div className="text-neutral-400 mb-1">My latest</div>
+              <div className="text-neutral-200 font-medium">
+                {myLatest ? `${myLatest.status}${myLatest.totalScore !== null ? ` ${myLatest.totalScore}/${myLatest.maxScore}` : ""}` : "None"}
+              </div>
+            </div>
+            <div className="rounded border border-neutral-800 bg-neutral-950/60 p-2">
+              <div className="text-neutral-400 mb-1">Opponent latest</div>
+              <div className="text-neutral-200 font-medium">
+                {oppLatest ? `${oppLatest.status}${oppLatest.totalScore !== null ? ` ${oppLatest.totalScore}/${oppLatest.maxScore}` : ""}` : "None"}
+              </div>
+            </div>
           </div>
           <div className="space-y-1 max-h-44 overflow-auto">
             {state.mySubmissions.map((s) => (
-              <div key={s.id} className="rounded border border-neutral-800 px-2 py-1 text-xs flex items-center justify-between">
-                <span className={s.status === "ACCEPTED" ? "text-emerald-300" : s.status === "PENDING" ? "text-amber-300" : "text-red-300"}>{s.status}</span>
-                <span className="text-neutral-400">{new Date(s.createdAt).toLocaleTimeString()}</span>
+              <div key={`me-${s.id}`} className="rounded border border-neutral-800 px-2 py-1 text-xs flex items-center justify-between">
+                <span className={s.status === "ACCEPTED" ? "text-emerald-300" : s.status === "PENDING" ? "text-amber-300" : "text-red-300"}>ME {s.status}</span>
+                <span className="text-neutral-400">
+                  {s.totalScore !== null && s.maxScore !== null ? `${s.totalScore}/${s.maxScore} · ` : ""}
+                  {new Date(s.createdAt).toLocaleTimeString()}
+                </span>
               </div>
             ))}
-            {state.mySubmissions.length === 0 ? <div className="text-xs text-neutral-500">No submissions yet.</div> : null}
+            {state.opponentSubmissions.map((s) => (
+              <div key={`opp-${s.id}`} className="rounded border border-neutral-800 px-2 py-1 text-xs flex items-center justify-between">
+                <span className={s.status === "ACCEPTED" ? "text-blue-300" : s.status === "PENDING" ? "text-amber-300" : "text-orange-300"}>OPP {s.status}</span>
+                <span className="text-neutral-400">
+                  {s.totalScore !== null && s.maxScore !== null ? `${s.totalScore}/${s.maxScore} · ` : ""}
+                  {new Date(s.createdAt).toLocaleTimeString()}
+                </span>
+              </div>
+            ))}
+            {state.mySubmissions.length === 0 && state.opponentSubmissions.length === 0 ? (
+              <div className="text-xs text-neutral-500">No submissions yet.</div>
+            ) : null}
           </div>
         </div>
       </section>

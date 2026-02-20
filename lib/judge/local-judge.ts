@@ -77,11 +77,17 @@ async function logDebug(msg: string) {
 async function updatePendingProgress(submissionId: string, processed: number, total: number) {
     const safeTotal = Math.max(1, total);
     const percent = Math.min(100, Math.floor((processed / safeTotal) * 100));
+    const existing = await db.submission.findUnique({
+        where: { id: submissionId },
+        select: { detail: true }
+    });
+    const previous = decodeSubmissionDetail(existing?.detail);
+
     await db.submission.update({
         where: { id: submissionId },
         data: {
             status: "PENDING",
-            detail: `채점 진행 중: ${percent}% (${processed}/${safeTotal})`
+            detail: encodeSubmissionDetail(`채점 진행 중 ${percent}% (${processed}/${safeTotal})`, previous.meta || undefined)
         }
     });
 }

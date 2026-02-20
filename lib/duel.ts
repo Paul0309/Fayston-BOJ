@@ -135,12 +135,13 @@ export async function finalizeDuelIfNeeded(battleId: string) {
   const startedMs = new Date(battle.startedAt).getTime();
   const deadlineMs = startedMs + battle.durationSec * 1000;
   const now = Date.now();
+  const windowEnd = battle.endedAt || new Date(deadlineMs);
 
   const relevantSubs = await db.submission.findMany({
     where: {
       problemId: battle.problemId,
       userId: { in: [battle.player1Id, battle.player2Id] },
-      detail: { contains: `"contestId":"${battle.id}"` }
+      OR: [{ detail: { contains: `"contestId":"${battle.id}"` } }, { createdAt: { gte: battle.startedAt, lte: windowEnd } }]
     },
     orderBy: { createdAt: "asc" },
     select: {
@@ -240,4 +241,3 @@ export async function finalizeDuelIfNeeded(battleId: string) {
     return updated;
   });
 }
-

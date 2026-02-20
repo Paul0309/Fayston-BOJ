@@ -43,29 +43,44 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
     if (!battle) return new NextResponse("Not found", { status: 404 });
     if (battle.player1Id !== userId && battle.player2Id !== userId) return new NextResponse("Forbidden", { status: 403 });
 
-    const submissions = await db.submission.findMany({
-      where: {
-        problemId: battle.problemId,
-        userId: { in: [battle.player1Id, battle.player2Id] },
-        detail: { contains: `"contestId":"${battle.id}"` }
-      },
-      orderBy: { createdAt: "desc" },
-      take: 50,
-      select: {
-        id: true,
-        userId: true,
-        status: true,
-        totalScore: true,
-        maxScore: true,
-        failedCase: true,
-        createdAt: true
-      }
-    });
+    const deadline = new Date(new Date(battle.startedAt).getTime() + battle.durationSec * 1000);
+    const windowEnd = battle.endedAt || deadline;
+
+    const [submissions, testCaseScore] = await Promise.all([
+      db.submission.findMany({
+        where: {
+          problemId: battle.problemId,
+          userId: { in: [battle.player1Id, battle.player2Id] },
+          OR: [{ detail: { contains: `"contestId":"${battle.id}"` } }, { createdAt: { gte: battle.startedAt, lte: windowEnd } }]
+        },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        select: {
+          id: true,
+          userId: true,
+          status: true,
+          totalScore: true,
+          maxScore: true,
+          failedCase: true,
+          createdAt: true
+        }
+      }),
+      db.testCase.aggregate({
+        where: { problemId: battle.problemId },
+        _sum: { score: true }
+      })
+    ]);
 
     const meId = userId;
     const opponentId = battle.player1Id === meId ? battle.player2Id : battle.player1Id;
     const mySubs = submissions.filter((s) => s.userId === meId);
     const oppSubs = submissions.filter((s) => s.userId === opponentId);
+    const myBestScore = mySubs.reduce((best, s) => Math.max(best, s.totalScore || 0), 0);
+    const oppBestScore = oppSubs.reduce((best, s) => Math.max(best, s.totalScore || 0), 0);
+    const computedMaxScore =
+      submissions.find((s) => typeof s.maxScore === "number" && (s.maxScore || 0) > 0)?.maxScore ||
+      testCaseScore._sum.score ||
+      null;
 
     return NextResponse.json({
       battle: {
@@ -81,6 +96,10 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
       },
       problem: battle.problem,
       mySubmissions: mySubs,
+      opponentSubmissions: oppSubs.slice(0, 8),
+      myBestScore,
+      opponentBestScore: oppBestScore,
+      scoreMax: computedMaxScore,
       opponentSubmissionCount: oppSubs.length,
       opponentAccepted: oppSubs.some((s) => s.status === "ACCEPTED")
     });
@@ -89,4 +108,3 @@ export async function GET(_: Request, ctx: { params: Promise<{ id: string }> }) 
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
-
