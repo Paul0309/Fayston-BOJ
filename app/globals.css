@@ -1170,6 +1170,120 @@ body {
   color: #d7f3e2;
 }
 
+.usaco-promo-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(0, 0, 0, 0.62);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.usaco-promo-modal {
+  position: relative;
+  z-index: 2;
+  width: min(560px, 92vw);
+  border: 1px solid #2f4f3a;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #111, #0d1510);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.5);
+  padding: 22px 20px;
+}
+
+.usaco-promo-modal h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: #9cf7c4;
+}
+
+.usaco-promo-modal p {
+  margin: 0;
+  color: #c6d0cb;
+  line-height: 1.5;
+}
+
+.usaco-promo-message {
+  margin-top: 12px;
+  padding: 9px 10px;
+  border: 1px solid #32503e;
+  border-radius: 8px;
+  background: #122019;
+  color: #b7efcd;
+  font-size: 13px;
+}
+
+.usaco-promo-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.usaco-promo-actions button {
+  border: 1px solid #2f4f3a;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #d8fbe7;
+  background: #1a3024;
+  cursor: pointer;
+}
+
+.usaco-promo-actions button.secondary {
+  color: #c4c4c4;
+  background: #202020;
+  border-color: #333;
+}
+
+.usaco-promo-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.usaco-promo-confetti {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.usaco-promo-piece {
+  position: absolute;
+  top: -12px;
+  width: 8px;
+  height: 14px;
+  border-radius: 3px;
+  background: #3ee18d;
+  animation: usaco-confetti-fall 2.3s linear infinite;
+}
+
+.usaco-promo-piece:nth-child(3n) {
+  background: #4f9cff;
+}
+
+.usaco-promo-piece:nth-child(4n) {
+  background: #ffd45b;
+}
+
+.usaco-promo-piece:nth-child(5n) {
+  background: #e66eff;
+}
+
+@keyframes usaco-confetti-fall {
+  0% {
+    transform: translateY(-5vh) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(540deg);
+    opacity: 0;
+  }
+}
+
 .usaco-submission-log-item.err {
   border-left: 3px solid #e65b5b;
   color: #ffd5d5;
