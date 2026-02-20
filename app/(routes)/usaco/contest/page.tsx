@@ -57,8 +57,7 @@ export default async function UsacoContestPage() {
   const statuses = await db.submission.findMany({
     where: {
       userId: user.id,
-      problemId: { in: problems.map((p) => p.id) },
-      detail: { contains: '"hiddenInStatus":true' }
+      problemId: { in: problems.map((p) => p.id) }
     },
     orderBy: { createdAt: "desc" },
     take: 200,

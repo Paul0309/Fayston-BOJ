@@ -73,8 +73,7 @@ export async function checkUserUsacoPromotionEligibility(userId: string): Promis
   const submissions = await db.submission.findMany({
     where: {
       userId,
-      problemId: { in: problems.map((p) => p.id) },
-      detail: { contains: '"hiddenInStatus":true' }
+      problemId: { in: problems.map((p) => p.id) }
     },
     orderBy: { createdAt: "desc" },
     select: {
