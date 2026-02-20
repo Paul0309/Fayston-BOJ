@@ -14,6 +14,9 @@ interface MarkdownMathProps {
 
 export default function MarkdownMath({ content, className, statementMode = false }: MarkdownMathProps) {
     if (!content) return null;
+    const normalized = content
+        .replace(/\\\[((?:.|\n)*?)\\\]/g, (_, expr: string) => `$$${expr}$$`)
+        .replace(/\\\(((?:.|\n)*?)\\\)/g, (_, expr: string) => `$${expr}$`);
 
     return (
         <div className={className}>
@@ -31,7 +34,7 @@ export default function MarkdownMath({ content, className, statementMode = false
                         : undefined
                 }
             >
-                {content}
+                {normalized}
             </ReactMarkdown>
         </div>
     );
