@@ -76,8 +76,8 @@ function levelClass(count: number, maxCount: number, inYear: boolean) {
 export default async function UserProfilePage(props: PageProps) {
   const { id } = await props.params;
   const currentYear = new Date().getFullYear();
-  const yearStart = `${currentYear}-01-01`;
-  const nextYearStart = `${currentYear + 1}-01-01`;
+  const yearStart = new Date(Date.UTC(currentYear, 0, 1));
+  const nextYearStart = new Date(Date.UTC(currentYear + 1, 0, 1));
 
   const user = await withDbRetry(() =>
     db.user.findUnique({
@@ -160,26 +160,26 @@ export default async function UserProfilePage(props: PageProps) {
     `),
     withDbRetry(() => db.$queryRaw<Array<{ day: string; count: bigint | number }>>`
       SELECT
-        DATE("createdAt") as "day",
+        TO_CHAR(DATE("createdAt"), 'YYYY-MM-DD') as "day",
         COUNT(*) as "count"
       FROM "Submission"
       WHERE "userId" = ${id}
         AND ("detail" IS NULL OR "detail" NOT LIKE '%"hiddenInStatus":true%')
         AND "createdAt" >= (NOW() - INTERVAL '59 days')
-      GROUP BY DATE("createdAt")
+      GROUP BY TO_CHAR(DATE("createdAt"), 'YYYY-MM-DD')
       ORDER BY "day" ASC
     `),
     withDbRetry(() => db.$queryRaw<Array<{ day: string; count: bigint | number }>>`
       SELECT
-        DATE("createdAt") as "day",
+        TO_CHAR(DATE("createdAt"), 'YYYY-MM-DD') as "day",
         COUNT(*) as "count"
       FROM "Submission"
       WHERE "userId" = ${id}
         AND "status" = 'ACCEPTED'
         AND ("detail" IS NULL OR "detail" NOT LIKE '%"hiddenInStatus":true%')
-        AND DATE("createdAt") >= ${yearStart}
-        AND DATE("createdAt") < ${nextYearStart}
-      GROUP BY DATE("createdAt")
+        AND "createdAt" >= ${yearStart}
+        AND "createdAt" < ${nextYearStart}
+      GROUP BY TO_CHAR(DATE("createdAt"), 'YYYY-MM-DD')
       ORDER BY "day" ASC
     `),
     withDbRetry(() => db.$queryRaw<Array<{ tags: string; solved: bigint | number }>>`
