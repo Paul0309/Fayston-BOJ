@@ -76,7 +76,7 @@ export async function POST(req: Request) {
             createdBy: admin.id
         });
 
-        return NextResponse.json({ id: problem.id });
+        return NextResponse.json({ id: problem.id, number: problem.number });
     } catch (error: unknown) {
         if (
             typeof error === "object" &&

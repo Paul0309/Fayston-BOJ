@@ -160,7 +160,7 @@ export default async function SubmissionDetailPage(props: PageProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Info label="사용자" value={submission.user.name || submission.user.id} href={`/user/${submission.user.id}`} />
-        <Info label="문제" value={`${submission.problem.number} - ${submission.problem.title}`} href={`/problem/${submission.problemId}`} />
+        <Info label="문제" value={`${submission.problem.number} - ${submission.problem.title}`} href={`/problem/${submission.problem.number}`} />
         <Info label="결과" value={submission.status + (pendingProgress !== null ? ` ${pendingProgress}%` : "")} />
         <Info label="공개 여부" value={getVisibilityLabel(submission.codeVisibility)} />
         <Info

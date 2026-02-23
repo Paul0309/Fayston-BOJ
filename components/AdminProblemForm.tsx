@@ -173,7 +173,7 @@ export default function AdminProblemForm({ initialAllowedLanguages }: AdminProbl
             }
 
             const data = await res.json();
-            router.push(`/problem/${data.id}`);
+            router.push(`/problem/${data.number}`);
             router.refresh();
         } catch (err) {
             console.error(err);

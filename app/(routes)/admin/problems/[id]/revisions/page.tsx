@@ -192,7 +192,7 @@ export default async function AdminProblemRevisionPage(props: PageProps) {
   });
 
   if (!problem) redirect("/admin");
-  if (problem.revisions.length === 0) redirect(`/problem/${problem.id}`);
+  if (problem.revisions.length === 0) redirect(`/problem/${problem.number}`);
 
   const selectedVersion = Number(searchParams.version || problem.revisions[0].version);
   const selected = problem.revisions.find((r) => r.version === selectedVersion) || problem.revisions[0];
@@ -219,7 +219,7 @@ export default async function AdminProblemRevisionPage(props: PageProps) {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Link href={`/problem/${problem.id}`} className="rounded bg-neutral-700 px-3 py-2 text-sm text-white hover:bg-neutral-600">
+              <Link href={`/problem/${problem.number}`} className="rounded bg-neutral-700 px-3 py-2 text-sm text-white hover:bg-neutral-600">
                 문제 보기
               </Link>
               <Link href="/admin/ai-management" className="rounded bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-500">

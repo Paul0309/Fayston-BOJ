@@ -154,7 +154,7 @@ export default async function TopProblemsPage(props: PageProps) {
                                 <tr key={problem.id} className="problem-row interactive-row hover:bg-neutral-800/70 transition-colors">
                                     <td className="px-6 py-4 font-mono text-neutral-300">{problem.number}</td>
                                     <td className="px-6 py-4">
-                                        <Link href={`/problem/${problem.id}`} className="font-medium hover:text-blue-400 hover:underline">{problem.title}</Link>
+                                        <Link href={`/problem/${problem.number}`} className="font-medium hover:text-blue-400 hover:underline">{problem.title}</Link>
                                         {solved && <span className="ml-2 text-xs text-green-400">해결됨</span>}
                                     </td>
                                     <td className="px-6 py-4 text-center text-xs"><span className="bg-neutral-800 px-2 py-1 rounded">{problem.difficulty}</span></td>

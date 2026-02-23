@@ -217,7 +217,7 @@ export default async function StatusPage(props: PageProps) {
                     </Link>
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/problem/${sub.problemId}`} className="font-medium hover:text-blue-400 hover:underline">
+                    <Link href={`/problem/${sub.problem.number}`} className="font-medium hover:text-blue-400 hover:underline">
                       {sub.problem.title}
                     </Link>
                   </td>

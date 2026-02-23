@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import ProblemCommunityPanel from "@/components/ProblemCommunityPanel";
@@ -13,7 +13,6 @@ import { getProblemDiscussions, getProblemEditorials } from "@/lib/problem-commu
 interface PageProps {
   params: Promise<{ id: string }>;
 }
-
 type ScoreRange = {
   start: number;
   end: number;
@@ -160,11 +159,14 @@ function buildScoreRanges(
 
 export default async function ProblemDetailPage(props: PageProps) {
   const params = await props.params;
+  const rawId = params.id.trim();
+  const numericId = Number(rawId);
+  const isNumberRoute = Number.isInteger(numericId) && numericId > 0 && String(numericId) === rawId;
 
   const [problem, session] = await Promise.all([
     withDbRetry(() =>
       db.problem.findUnique({
-        where: { id: params.id },
+        where: isNumberRoute ? { number: numericId } : { id: rawId },
         include: {
           testCases: { orderBy: { id: "asc" } },
           _count: { select: { submissions: { where: { status: "ACCEPTED" } } } }
@@ -175,11 +177,12 @@ export default async function ProblemDetailPage(props: PageProps) {
   ]);
 
   if (!problem) return notFound();
+  if (!isNumberRoute) redirect(`/problem/${problem.number}`);
 
   const { id: userId, role } = getSessionUser(session);
   const [editorials, discussions] = await Promise.all([
-    getProblemEditorials(params.id),
-    getProblemDiscussions(params.id, 200, userId)
+    getProblemEditorials(problem.id),
+    getProblemDiscussions(problem.id, 200, userId)
   ]);
   const visibleCases = problem.testCases.filter((tc) => !tc.isHidden);
   const maxScore = problem.testCases.reduce((acc, tc) => acc + tc.score, 0);
@@ -318,3 +321,4 @@ export default async function ProblemDetailPage(props: PageProps) {
     </div>
   );
 }
+

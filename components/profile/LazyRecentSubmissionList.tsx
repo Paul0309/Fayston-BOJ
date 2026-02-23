@@ -98,7 +98,7 @@ export default function LazyRecentSubmissionList({ title, items }: { title: stri
             {visibleGridRows.map((row, rowIndex) => (
               <div key={`row-${rowIndex}`} className="flex flex-wrap gap-x-2">
                 {row.map((item) => (
-                  <Link key={item.submissionId} href={`/problem/${item.problemId}`} className="rounded px-1.5 py-0.5 transition hover:bg-blue-500/15 hover:text-blue-200" title={new Date(item.submittedAt).toLocaleString()}>
+                  <Link key={item.submissionId} href={`/problem/${item.problemNumber}`} className="rounded px-1.5 py-0.5 transition hover:bg-blue-500/15 hover:text-blue-200" title={new Date(item.submittedAt).toLocaleString()}>
                     {item.problemNumber}
                   </Link>
                 ))}
@@ -128,7 +128,7 @@ export default function LazyRecentSubmissionList({ title, items }: { title: stri
               return (
                 <li key={item.submissionId} className="px-6 py-4 transition hover:bg-neutral-800/40">
                   <div className="flex flex-wrap items-center gap-3">
-                    <Link href={`/problem/${item.problemId}`} className="font-mono text-blue-400 hover:underline">#{item.problemNumber}</Link>
+                    <Link href={`/problem/${item.problemNumber}`} className="font-mono text-blue-400 hover:underline">#{item.problemNumber}</Link>
                     <button type="button" onClick={() => void toggle(item)} className="rounded border border-neutral-600 px-2 py-1 text-xs text-neutral-200 transition hover:border-blue-400/60 hover:bg-blue-500/10">
                       {isOpen ? "\uB2EB\uAE30" : "\uC790\uC138\uD788 \uBCF4\uAE30"}
                     </button>

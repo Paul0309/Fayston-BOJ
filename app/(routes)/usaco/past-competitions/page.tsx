@@ -28,10 +28,10 @@ export default async function UsacoPastCompetitionsPage({
   const problems = await db.problem.findMany({
     where: { tags: { contains: "usaco" } },
     orderBy: { number: "asc" },
-    select: { id: true, title: true, tags: true }
+    select: { id: true, number: true, title: true, tags: true }
   });
 
-  const grouped: Record<Division, Array<{ id: string; title: string }>> = {
+  const grouped: Record<Division, Array<{ id: string; number: number; title: string }>> = {
     Bronze: [],
     Silver: [],
     Gold: [],
@@ -39,7 +39,7 @@ export default async function UsacoPastCompetitionsPage({
   };
 
   for (const p of problems) {
-    grouped[getDivision(p.tags)].push({ id: p.id, title: p.title });
+    grouped[getDivision(p.tags)].push({ id: p.id, number: p.number, title: p.title });
   }
 
   const selectedMeta = COMPETITIONS.find((item) => item.id === selectedCompetition);
@@ -78,7 +78,7 @@ export default async function UsacoPastCompetitionsPage({
                       <div className="usaco-past-problem-name">
                         {idx + 1}. {problem.title.replace(/^\[USACO\s+[^\]]+\]\s*/i, "")}
                       </div>
-                      <Link href={`/problem/${problem.id}`} className="usaco-past-view-btn">
+                      <Link href={`/problem/${problem.number}`} className="usaco-past-view-btn">
                         View question
                       </Link>
                     </div>
@@ -92,4 +92,3 @@ export default async function UsacoPastCompetitionsPage({
     </div>
   );
 }
-
